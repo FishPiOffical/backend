@@ -1,0 +1,392 @@
+/*
+ * Rhythm 管理后台基础排版、布局尺寸与通用控件样式规范。
+ */
+
+@font-face {
+  font-family: HarmonyOS;
+  src:
+    url('https://resource.hellofont.cn/font/HarmonyOS_SansSC_Regular-J.woff2') format('woff2'),
+    url('https://resource.hellofont.cn/font/HarmonyOS_SansSC_Regular-J.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: HarmonyOS;
+  src:
+    url('https://resource.hellofont.cn/font/HarmonyOS_SansSC_Medium-J.woff2') format('woff2'),
+    url('https://resource.hellofont.cn/font/HarmonyOS_SansSC_Medium-J.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: HarmonyOS;
+  src:
+    url('https://resource.hellofont.cn/font/HarmonyOS_SansSC_Bold-J.woff2') format('woff2'),
+    url('https://resource.hellofont.cn/font/HarmonyOS_SansSC_Bold-J.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fp-font-sans: HarmonyOS, 'HarmonyOS Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  --fp-font-mono: ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+
+  --fp-radius-sm: 6px;
+  --fp-radius-md: 8px;
+  --fp-radius-lg: 10px;
+  --fp-radius-xl: 14px;
+
+  --fp-control-height: 36px;
+  --fp-touch-target: 44px;
+  --fp-sidebar-w: 240px;
+  --fp-sidebar-collapsed-w: 64px;
+  --fp-topbar-h: 60px;
+  --fp-content-gap: 20px;
+  --fp-table-row-h: 48px;
+  --fp-table-row-compact-h: 38px;
+  --fp-transition-fast: 155ms ease;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--fp-page-bg);
+  color: var(--fp-text);
+  font-family: var(--fp-font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--fp-link);
+  text-decoration: none;
+  transition: color var(--fp-transition-fast);
+}
+
+a:hover {
+  color: var(--fp-link-hover);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--fp-primary);
+  outline-offset: 2px;
+}
+
+/* 减少动态效果偏好适配 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.admin-mono {
+  font-family: var(--fp-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.admin-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 16px;
+}
+
+.admin-page__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--fp-title);
+}
+
+.admin-page__subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--fp-muted);
+}
+
+.admin-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-panel {
+  background: var(--fp-card);
+  border: 1px solid var(--fp-border);
+  border-radius: var(--fp-radius-lg);
+  box-shadow: var(--fp-card-shadow);
+  padding: 18px 20px;
+}
+
+.admin-panel--subtle {
+  background: var(--fp-elevated);
+  box-shadow: none;
+}
+
+/* 通用按钮控件 */
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--fp-control-height);
+  padding: 0 14px;
+  border-radius: var(--fp-radius-sm);
+  border: 1px solid var(--fp-border-strong);
+  background: var(--fp-card);
+  color: var(--fp-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color var(--fp-transition-fast),
+    border-color var(--fp-transition-fast),
+    color var(--fp-transition-fast),
+    opacity var(--fp-transition-fast);
+}
+
+.admin-btn:hover:not(:disabled) {
+  background: var(--fp-hover);
+  border-color: var(--fp-muted);
+}
+
+.admin-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-btn--primary {
+  background: var(--fp-primary-fill);
+  border-color: var(--fp-primary-fill);
+  color: #ffffff;
+}
+
+.admin-btn--primary:hover:not(:disabled) {
+  background: var(--fp-primary-fill-hover);
+  border-color: var(--fp-primary-fill-hover);
+}
+
+.admin-btn--danger {
+  background: var(--fp-danger);
+  border-color: var(--fp-danger);
+  color: #ffffff;
+}
+
+.admin-btn--danger:hover:not(:disabled) {
+  background: var(--fp-danger-hover);
+  border-color: var(--fp-danger-hover);
+}
+
+.admin-btn--danger-outline {
+  background: var(--fp-danger-soft);
+  border-color: transparent;
+  color: var(--fp-danger-ink);
+}
+
+.admin-btn--danger-outline:hover:not(:disabled) {
+  background: var(--fp-danger);
+  color: #ffffff;
+}
+
+.admin-btn--warning-outline {
+  background: var(--fp-warning-soft);
+  border-color: transparent;
+  color: var(--fp-warning);
+}
+
+.admin-btn--sm {
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+/* 通用表单输入 */
+.admin-input,
+.admin-select,
+.admin-textarea {
+  width: 100%;
+  min-height: var(--fp-control-height);
+  padding: 7px 11px;
+  border-radius: var(--fp-radius-sm);
+  border: 1px solid var(--fp-border-strong);
+  background: var(--fp-control-bg);
+  color: var(--fp-text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.45;
+  transition: border-color var(--fp-transition-fast), box-shadow var(--fp-transition-fast);
+}
+
+.admin-input:focus,
+.admin-select:focus,
+.admin-textarea:focus {
+  outline: none;
+  border-color: var(--fp-primary);
+  box-shadow: var(--fp-focus-ring);
+}
+
+.admin-input:disabled,
+.admin-select:disabled,
+.admin-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+/* 状态页签与筛选栏 */
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-tab {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: var(--fp-radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fp-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--fp-transition-fast), color var(--fp-transition-fast);
+}
+
+.admin-tab:hover {
+  background: var(--fp-hover);
+  color: var(--fp-title);
+}
+
+.admin-tab.is-active {
+  background: var(--fp-primary-soft);
+  color: var(--fp-primary);
+  border-color: transparent;
+}
+
+.admin-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 数据表格 */
+.admin-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--fp-border);
+  border-radius: var(--fp-radius-lg);
+  background: var(--fp-card);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--fp-border);
+  vertical-align: middle;
+}
+
+.admin-table thead th {
+  background: var(--fp-elevated);
+  color: var(--fp-head);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-table tbody tr {
+  min-height: var(--fp-table-row-h);
+  transition: background-color var(--fp-transition-fast);
+}
+
+.admin-table tbody tr:hover {
+  background: var(--fp-hover);
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table--compact th,
+.admin-table--compact td {
+  padding: 7px 12px;
+}
+
+.admin-table--compact tbody tr {
+  min-height: var(--fp-table-row-compact-h);
+}
+
+/* 移动端适配：增大触控目标并将输入字号设为 16px 防止 iOS 自动缩放 */
+@media (max-width: 768px) {
+  .admin-page__title {
+    font-size: 21px;
+  }
+
+  .admin-panel {
+    padding: 14px 16px;
+  }
+
+  .admin-btn,
+  .admin-tab {
+    min-height: var(--fp-touch-target);
+  }
+
+  .admin-btn--sm {
+    min-height: 36px;
+  }
+
+  .admin-input,
+  .admin-select,
+  .admin-textarea {
+    min-height: var(--fp-touch-target);
+    font-size: 16px;
+  }
+}

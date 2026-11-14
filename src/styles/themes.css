@@ -1,0 +1,90 @@
+/*
+ * Rhythm 管理后台深浅色主题变量。
+ * 颜色严格对齐《Rhythm 管理后台开发规划》与 website_v3 经典主题：
+ * 默认使用经典浅色（classic-light），支持切换经典深色（classic-dark）。
+ */
+
+:root,
+html[data-theme='classic-light'] {
+  color-scheme: light;
+
+  --fp-page-bg: #f5f6f8;
+  --fp-bg: #ffffff;
+  --fp-nav: #ffffff;
+  --fp-card: #ffffff;
+  --fp-elevated: #f9fafb;
+
+  --fp-text: #2c2e33;
+  --fp-title: #1f2329;
+  --fp-head: #4b525c;
+  --fp-muted: #676e79;
+
+  --fp-primary: #60b044;
+  --fp-primary-hover: #539e38;
+  --fp-primary-fill: #36752e;
+  --fp-primary-fill-hover: #2c6125;
+  --fp-primary-soft: rgba(96, 176, 68, 0.14);
+
+  --fp-link: #2865bc;
+  --fp-link-hover: #1e5199;
+  --fp-accent: #e59230;
+  --fp-warning: #e59230;
+  --fp-warning-soft: rgba(229, 146, 48, 0.14);
+  --fp-danger: #dc2626;
+  --fp-danger-hover: #b91c1c;
+  --fp-danger-soft: rgba(220, 38, 38, 0.12);
+  --fp-danger-ink: #b91c1c;
+
+  --fp-border: #e6e8ec;
+  --fp-border-strong: #d0d5dd;
+  --fp-hover: rgba(31, 35, 41, 0.04);
+
+  --fp-control-bg: #ffffff;
+  --fp-nav-shadow: 0 1px 0 #e6e8ec;
+  --fp-card-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --fp-dialog-shadow: 0 18px 48px rgba(15, 23, 42, 0.16);
+  --fp-mask-bg: rgba(15, 23, 42, 0.45);
+  --fp-focus-ring: 0 0 0 3px rgba(96, 176, 68, 0.22);
+}
+
+html[data-theme='classic-dark'] {
+  color-scheme: dark;
+
+  --fp-page-bg: #242626;
+  --fp-bg: #242626;
+  --fp-nav: #242525;
+  --fp-card: #282a2a;
+  --fp-elevated: #2f3232;
+
+  --fp-text: #cbc5ba;
+  --fp-title: #ddd7cc;
+  --fp-head: #aca396;
+  --fp-muted: #9e9689;
+
+  --fp-primary: #69aa69;
+  --fp-primary-hover: #5b9a5b;
+  --fp-primary-fill: #36773b;
+  --fp-primary-fill-hover: #2d6531;
+  --fp-primary-soft: rgba(105, 170, 105, 0.16);
+
+  --fp-link: #5c9fdf;
+  --fp-link-hover: #7bb4ec;
+  --fp-accent: #e59230;
+  --fp-warning: #e59230;
+  --fp-warning-soft: rgba(229, 146, 48, 0.16);
+  --fp-danger: #d9534f;
+  --fp-danger-hover: #c6433f;
+  --fp-danger-soft: rgba(217, 83, 79, 0.16);
+  --fp-danger-ink: #ef887b;
+
+  --fp-border: rgba(255, 255, 255, 0.08);
+  --fp-border-strong: rgba(255, 255, 255, 0.16);
+  --fp-hover: rgba(255, 255, 255, 0.05);
+
+  --fp-control-bg: #2f3232;
+  --fp-nav-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
+  --fp-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+  --fp-dialog-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  --fp-mask-bg: rgba(0, 0, 0, 0.58);
+  --fp-focus-ring: 0 0 0 3px rgba(105, 170, 105, 0.24);
+}
