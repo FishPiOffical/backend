@@ -173,6 +173,152 @@ const routes: RouteRecordRaw[] = [
         redirect: '/system/audit-logs',
       },
       {
+        path: 'review/fish-games',
+        name: 'fish-game-review',
+        component: () => import('@/views/review/FishGameReviewView.vue'),
+        meta: {
+          title: '鱼游投稿审核',
+          groupTitle: '审核中心',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && (c.isAdmin || Boolean(c.permissions.menuAdminMisc)),
+        },
+      },
+      {
+        path: 'review/milestones',
+        name: 'milestone-review',
+        component: () => import('@/views/review/MilestoneReviewView.vue'),
+        meta: {
+          title: '大事记审核',
+          groupTitle: '审核中心',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && (c.isAdmin || Boolean(c.permissions.menuAdminMilestone)),
+        },
+      },
+      {
+        path: 'review/images',
+        name: 'image-review',
+        component: () => import('@/views/review/ImageReviewView.vue'),
+        meta: {
+          title: '图片审核',
+          groupTitle: '审核中心',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && !c.rhypicEnabled && c.isAdmin,
+        },
+      },
+      {
+        path: 'users/roles',
+        name: 'roles',
+        component: () => import('@/views/users/RoleManageView.vue'),
+        meta: {
+          title: '角色权限配置',
+          groupTitle: '用户与权限',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && Boolean(c.permissions.menuAdminRoles),
+        },
+      },
+      {
+        path: 'users/invitecodes',
+        name: 'invitecodes',
+        component: () => import('@/views/users/InvitecodeManageView.vue'),
+        meta: {
+          title: '邀请码管理',
+          groupTitle: '用户与权限',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && Boolean(c.permissions.menuAdminIcs),
+        },
+      },
+      {
+        path: 'assets/vip',
+        name: 'vip',
+        component: () => import('@/views/assets/VipManageView.vue'),
+        meta: {
+          title: 'VIP 与套餐优惠券',
+          groupTitle: '会员与资产',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && c.isAdmin,
+        },
+      },
+      {
+        path: 'assets/medals',
+        name: 'medals',
+        component: () => import('@/views/assets/MedalManageView.vue'),
+        meta: {
+          title: '勋章定义与授予',
+          groupTitle: '会员与资产',
+          requiresAuth: true,
+          checkAccess: (c) =>
+            c.canAccessAdmin &&
+            (c.isAdmin || Boolean(c.permissions.userGiveMetal || c.permissions.userRemoveMetal)),
+        },
+      },
+      {
+        path: 'assets/points-bags',
+        name: 'points-bags',
+        component: () => import('@/views/assets/PointsBagsView.vue'),
+        meta: {
+          title: '积分、工资与背包',
+          groupTitle: '会员与资产',
+          requiresAuth: true,
+          checkAccess: (c) =>
+            c.canAccessAdmin &&
+            (c.isAdmin ||
+              Boolean(
+                c.permissions.userAddPoint ||
+                  c.permissions.userDeductPoint ||
+                  c.permissions.userExchangePoint ||
+                  c.permissions.userAdjustBag,
+              )),
+        },
+      },
+      {
+        path: 'ops/domains-tags',
+        name: 'domains-tags',
+        component: () => import('@/views/ops/DomainsTagsView.vue'),
+        meta: {
+          title: '领域、导航与标签',
+          groupTitle: '社区运营',
+          requiresAuth: true,
+          checkAccess: (c) =>
+            c.canAccessAdmin && Boolean(c.permissions.menuAdminDomains || c.permissions.menuAdminTags),
+        },
+      },
+      {
+        path: 'ops/reserved-ad',
+        name: 'reserved-ad',
+        component: () => import('@/views/ops/ReservedAdView.vue'),
+        meta: {
+          title: '保留词与广告位',
+          groupTitle: '社区运营',
+          requiresAuth: true,
+          checkAccess: (c) =>
+            c.canAccessAdmin && Boolean(c.permissions.menuAdminRWs || c.permissions.menuAdminAD),
+        },
+      },
+      {
+        path: 'ops/community-records',
+        name: 'community-records',
+        component: () => import('@/views/ops/CommunityRecordsView.vue'),
+        meta: {
+          title: '鱼游与大事记维护',
+          groupTitle: '社区运营',
+          requiresAuth: true,
+          checkAccess: (c) =>
+            c.canAccessAdmin &&
+            (c.isAdmin || Boolean(c.permissions.menuAdminMisc || c.permissions.menuAdminMilestone)),
+        },
+      },
+      { path: 'modules/fish-game-review', redirect: '/review/fish-games' },
+      { path: 'modules/milestone-review', redirect: '/review/milestones' },
+      { path: 'modules/image-review', redirect: '/review/images' },
+      { path: 'modules/roles', redirect: '/users/roles' },
+      { path: 'modules/invitecodes', redirect: '/users/invitecodes' },
+      { path: 'modules/vip', redirect: '/assets/vip' },
+      { path: 'modules/medals', redirect: '/assets/medals' },
+      { path: 'modules/points-bags', redirect: '/assets/points-bags' },
+      { path: 'modules/domains-tags', redirect: '/ops/domains-tags' },
+      { path: 'modules/reserved-ad', redirect: '/ops/reserved-ad' },
+      { path: 'modules/community-records', redirect: '/ops/community-records' },
+      {
         path: 'oauth/clients',
         name: 'oauth-clients',
         component: () => import('@/views/oauth/OAuthClientView.vue'),

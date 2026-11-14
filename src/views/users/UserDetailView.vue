@@ -566,6 +566,27 @@ onMounted(() => {
                 >
                   该用户执行的操作
                 </RouterLink>
+                <RouterLink
+                  v-if="auth.capabilities?.actions.vipManage"
+                  :to="`/assets/vip?target=${encodeURIComponent(userProfile.userName)}`"
+                  class="admin-btn admin-btn--sm"
+                >
+                  VIP 管理
+                </RouterLink>
+                <RouterLink
+                  v-if="auth.capabilities?.actions.medalManage"
+                  :to="`/assets/medals?target=${encodeURIComponent(userProfile.userName)}`"
+                  class="admin-btn admin-btn--sm"
+                >
+                  勋章授予
+                </RouterLink>
+                <RouterLink
+                  v-if="auth.capabilities?.actions.pointAdd || auth.capabilities?.actions.pointDeduct || auth.capabilities?.actions.bagAdjust"
+                  :to="`/assets/points-bags?target=${encodeURIComponent(userProfile.userName)}`"
+                  class="admin-btn admin-btn--sm"
+                >
+                  积分与背包
+                </RouterLink>
               </div>
             </div>
           </div>

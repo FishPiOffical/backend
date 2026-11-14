@@ -51,6 +51,27 @@ export interface AdminCapabilities {
     breezemoonEdit: boolean
     breezemoonRemove: boolean
     auditLogView: boolean
+    fishGameReview: boolean
+    milestoneReview: boolean
+    imageReview: boolean
+    roleManage: boolean
+    invitecodeManage: boolean
+    vipManage: boolean
+    medalDefine: boolean
+    medalGrant: boolean
+    medalRevoke: boolean
+    medalManage: boolean
+    pointAdd: boolean
+    pointDeduct: boolean
+    pointExchange: boolean
+    bagAdjust: boolean
+    salaryPay: boolean
+    domainManage: boolean
+    tagManage: boolean
+    reservedWordManage: boolean
+    adManage: boolean
+    fishGameManage: boolean
+    milestoneManage: boolean
   }
   fetchedAt: number
 }
@@ -856,3 +877,5 @@ export async function fetchAdminAuditLogs(params: {
   }
   return requestData(`/api/v3/admin/audit-logs?${qs.toString()}`)
 }
+
+export * from './adminStage3'

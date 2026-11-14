@@ -180,3 +180,19 @@
 ```
 
 前端统一按“成功 / 失败 / 未执行 / 待确认”四类分组展示明细，并保留针对失败或待确认对象的逐项复核入口。
+
+## 四、第三阶段（完整运营功能）接口与动作映射
+
+| 模块 | 前端路由 | 核心 V3 接口 | 权限 / 动作开关 |
+| --- | --- | --- | --- |
+| 鱼游投稿审核 | `/review/fish-games` | `GET /api/v3/admin/fish-games`、`POST /api/v3/admin/fish-games/{gameId}/review` | `fishGameReview`（管理员） |
+| 大事记审核 | `/review/milestones` | `GET /api/v3/admin/milestones`、`PUT /api/v3/admin/milestones/{milestoneId}`、`DELETE /api/v3/admin/milestones/{milestoneId}` | `milestoneReview`（管理员或 `menuManageMilestone`） |
+| 图片审核 | `/review/images` | `GET /api/v3/admin/images`、`POST /api/v3/admin/images/{imageId}/review` | `imageReview`（管理员且 `!rhypicEnabled`） |
+| 角色权限配置 | `/users/roles` | `/api/v3/admin/roles*` | `roleManage`（`menuAdminRoles`；非管理员隔离高危权限） |
+| 邀请码管理 | `/users/invitecodes` | `/api/v3/admin/invitecodes*` | `invitecodeManage`（`menuAdminIcs`，状态 `0/1/2`） |
+| VIP 与优惠券 | `/assets/vip` | `/api/v3/admin/vip/*`、`/api/v3/admin/coupons*` | `vipManage`（管理员，优惠券 `-1` 为无限次） |
+| 勋章定义与授予 | `/assets/medals` | `/api/v3/admin/medals*` | `medalDefine` / `medalGrant` / `medalRevoke` |
+| 积分、工资与背包 | `/assets/points-bags` | `/api/v3/admin/points/*`、`/api/v3/admin/salary/pay`、`/api/v3/admin/bags/adjust` | `pointAdd` / `pointDeduct` / `pointExchange` / `salaryPay` / `bagAdjust` |
+| 领域、导航与标签 | `/ops/domains-tags` | `/api/v3/admin/domains*`、`/api/v3/admin/tags*` | `domainManage` / `tagManage` |
+| 保留词与广告位 | `/ops/reserved-ad` | `/api/v3/admin/reserved-words*`、`/api/v3/admin/ads` | `reservedWordManage` / `adManage` |
+| 鱼游与大事记维护 | `/ops/community-records` | `/api/v3/admin/fish-games*`、`/api/v3/admin/milestones*` | `fishGameManage` / `milestoneManage` |

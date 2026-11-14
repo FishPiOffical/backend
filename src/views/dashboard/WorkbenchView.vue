@@ -67,13 +67,21 @@ const quickEntries = computed<QuickEntry[]>(() => {
 
 const stageOneEntries = computed(() =>
   quickEntries.value.filter(
-    (entry) => entry.item.phase === '一期V3' || entry.item.phase === '二期V3' || entry.item.phase === '既有V3',
+    (entry) =>
+      entry.item.phase === '一期V3' ||
+      entry.item.phase === '二期V3' ||
+      entry.item.phase === '三期V3' ||
+      entry.item.phase === '既有V3',
   ),
 )
 
 const previewEntries = computed(() =>
   quickEntries.value.filter(
-    (entry) => entry.item.phase !== '一期V3' && entry.item.phase !== '二期V3' && entry.item.phase !== '既有V3',
+    (entry) =>
+      entry.item.phase !== '一期V3' &&
+      entry.item.phase !== '二期V3' &&
+      entry.item.phase !== '三期V3' &&
+      entry.item.phase !== '既有V3',
   ),
 )
 
@@ -278,7 +286,7 @@ onMounted(() => {
                 <div class="wb-entry-card__top">
                   <span class="wb-entry-card__group">{{ entry.groupLabel }}</span>
                   <StatusBadge
-                    :tone="entry.item.phase === '一期V3' || entry.item.phase === '二期V3' ? 'success' : 'info'"
+                    :tone="entry.item.phase === '一期V3' || entry.item.phase === '二期V3' || entry.item.phase === '三期V3' ? 'success' : 'info'"
                     :label="entry.item.phase"
                   />
                 </div>
