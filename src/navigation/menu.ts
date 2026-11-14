@@ -8,7 +8,7 @@ export interface AdminNavItem {
   id: string
   label: string
   to: string
-  phase: '一期V3' | '既有V3' | '二期' | '三期' | '四期'
+  phase: '一期V3' | '二期V3' | '既有V3' | '二期' | '三期' | '四期'
   check?: (caps: AdminCapabilities) => boolean
   hideWhenRhypic?: boolean
 }
@@ -93,22 +93,22 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
       {
         id: 'articles',
         label: '文章与专栏',
-        to: '/modules/articles',
-        phase: '二期',
+        to: '/content/articles',
+        phase: '二期V3',
         check: (c) => c.canAccessAdmin && Boolean(c.permissions.menuAdminArticles),
       },
       {
         id: 'comments',
         label: '评论管理',
-        to: '/modules/comments',
-        phase: '二期',
+        to: '/content/comments',
+        phase: '二期V3',
         check: (c) => c.canAccessAdmin && Boolean(c.permissions.menuAdminComments),
       },
       {
         id: 'breezemoons',
         label: '清风明月',
-        to: '/modules/breezemoons',
-        phase: '二期',
+        to: '/content/breezemoons',
+        phase: '二期V3',
         check: (c) => c.canAccessAdmin && Boolean(c.permissions.menuAdminBreezemoons),
       },
     ],
@@ -253,8 +253,8 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
       {
         id: 'audit-logs',
         label: '操作审计日志',
-        to: '/modules/audit-logs',
-        phase: '二期',
+        to: '/system/audit-logs',
+        phase: '二期V3',
         check: (c) => c.canAccessAdmin,
       },
       {
@@ -312,42 +312,6 @@ export const PLACEHOLDER_MODULES: Record<string, PlaceholderModuleSpec> = {
     summary: '启用 RhyPic 时旧版图片审核入口应隐藏；接入前需先核实实际图床管理接口能力。',
     constraints: ['严禁在启用 RhyPic 后展示失效的旧七牛删图入口'],
     check: (c) => c.canAccessAdmin && !c.rhypicEnabled,
-  },
-  articles: {
-    id: 'articles',
-    groupLabel: '内容管理',
-    title: '文章与长篇专栏管理',
-    phase: '二期',
-    requiredPermissionDesc: 'menuAdminArticles',
-    legacyEntry: '/admin',
-    legacyLabel: '前往旧版管理后台',
-    summary: '第二阶段优先实现：文章检索、新增/编辑、封禁/恢复、精选置顶、评论开关、长篇专栏章节关联与匿名访问控制。',
-    constraints: ['必须通过新增全站管理 V3 接口实现，不可直接复用用户侧发文/删帖接口', '复杂正文编辑离开时需保留未保存提示'],
-    check: (c) => c.canAccessAdmin && Boolean(c.permissions.menuAdminArticles),
-  },
-  comments: {
-    id: 'comments',
-    groupLabel: '内容管理',
-    title: '评论管理',
-    phase: '二期',
-    requiredPermissionDesc: 'menuAdminComments',
-    legacyEntry: '/admin',
-    legacyLabel: '前往旧版管理后台',
-    summary: '第二阶段优先实现：全站评论检索、上下文定位及违规评论处置追溯。',
-    constraints: ['删除目标前需展示所属文章与作者摘要并独立记录操作日志'],
-    check: (c) => c.canAccessAdmin && Boolean(c.permissions.menuAdminComments),
-  },
-  breezemoons: {
-    id: 'breezemoons',
-    groupLabel: '内容管理',
-    title: '清风明月管理',
-    phase: '二期',
-    requiredPermissionDesc: 'menuAdminBreezemoons',
-    legacyEntry: '/admin',
-    legacyLabel: '前往旧版管理后台',
-    summary: '第二阶段实现：清风明月列表查询、内容修订与移除处置。',
-    constraints: ['移除后同步刷新前端与职业来源移除事件'],
-    check: (c) => c.canAccessAdmin && Boolean(c.permissions.menuAdminBreezemoons),
   },
   roles: {
     id: 'roles',
@@ -468,18 +432,6 @@ export const PLACEHOLDER_MODULES: Record<string, PlaceholderModuleSpec> = {
     summary: '第四阶段提供严格只读的宠物活动与风控日志检索，对齐原网页 Session 鉴权门槛。',
     constraints: ['首版严格只读，不提供改币、重置宠物或清零操作'],
     check: (c) => c.canAccessAdmin && c.isAdmin,
-  },
-  'audit-logs': {
-    id: 'audit-logs',
-    groupLabel: '系统与安全',
-    title: '全站操作审计日志',
-    phase: '二期',
-    requiredPermissionDesc: 'menuAdmin',
-    legacyEntry: '/admin',
-    legacyLabel: '前往旧版管理后台',
-    summary: '第二阶段实现：全站管理操作日志检索与追溯（工作台目前已先提供最近 10 条真实操作摘要）。',
-    constraints: ['旧历史缺少修改前后值时如实显示操作代码与目标 ID，不补造对比数据'],
-    check: (c) => c.canAccessAdmin,
   },
   'site-settings': {
     id: 'site-settings',

@@ -529,6 +529,44 @@ onMounted(() => {
               <p class="ud-summary__ids admin-mono">
                 oId: {{ userProfile.oId }} · 会员序号: #{{ userProfile.userNo || '-' }} · 注册时间: {{ formatDateTime(userProfile.createdAt) }}
               </p>
+              <!-- 联动跳转至二期内容管理与全站操作审计 -->
+              <div class="ud-quick-links">
+                <RouterLink
+                  v-if="auth.capabilities?.canAccessAdmin && auth.capabilities?.permissions.menuAdminArticles"
+                  :to="`/content/articles?keyword=${encodeURIComponent(userProfile.userName)}`"
+                  class="admin-btn admin-btn--sm"
+                >
+                  TA 的文章
+                </RouterLink>
+                <RouterLink
+                  v-if="auth.capabilities?.canAccessAdmin && auth.capabilities?.permissions.menuAdminComments"
+                  :to="`/content/comments?keyword=${encodeURIComponent(userProfile.userName)}`"
+                  class="admin-btn admin-btn--sm"
+                >
+                  TA 的评论
+                </RouterLink>
+                <RouterLink
+                  v-if="auth.capabilities?.canAccessAdmin && auth.capabilities?.permissions.menuAdminBreezemoons"
+                  :to="`/content/breezemoons?authorId=${encodeURIComponent(userProfile.oId)}`"
+                  class="admin-btn admin-btn--sm"
+                >
+                  TA 的清风明月
+                </RouterLink>
+                <RouterLink
+                  v-if="auth.capabilities?.canAccessAdmin"
+                  :to="`/system/audit-logs?dataId=${encodeURIComponent(userProfile.oId)}`"
+                  class="admin-btn admin-btn--sm"
+                >
+                  针对该用户的审计
+                </RouterLink>
+                <RouterLink
+                  v-if="auth.capabilities?.canAccessAdmin"
+                  :to="`/system/audit-logs?operator=${encodeURIComponent(userProfile.oId)}`"
+                  class="admin-btn admin-btn--sm"
+                >
+                  该用户执行的操作
+                </RouterLink>
+              </div>
             </div>
           </div>
 
@@ -1052,6 +1090,13 @@ onMounted(() => {
   width: 100%;
   font-size: 12px;
   color: var(--fp-danger-ink);
+}
+
+.ud-quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 @media (max-width: 1024px) {

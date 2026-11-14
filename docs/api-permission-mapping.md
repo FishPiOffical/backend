@@ -32,9 +32,21 @@
       "menuAdmin": true,
       "menuAdminReports": true,
       "menuAdminUsers": true,
+      "menuAdminArticles": true,
+      "menuAdminComments": true,
+      "menuAdminBreezemoons": true,
       "userUpdateUserBasic": true,
       "userUpdateUserAdvanced": true,
-      "userRemoveMFA": true
+      "userRemoveMFA": true,
+      "articleAddArticle": true,
+      "articleUpdateArticleBasic": true,
+      "articleStickArticle": true,
+      "articleCancelStickArticle": true,
+      "articleRemoveArticle": true,
+      "commentUpdateCommentBasic": true,
+      "commentRemoveComment": true,
+      "breezemoonUpdateBreezemoon": true,
+      "breezemoonRemoveBreezemoon": true
     },
     "menus": {
       "workbench": true,
@@ -54,9 +66,20 @@
       "identityReview": true,
       "userEditBasic": true,
       "userEditAdvanced": true,
+      "userEditRole": true,
       "userDeactivate": true,
       "userRemoveMfa": true,
-      "oauthManage": true
+      "oauthManage": true,
+      "articleCreate": true,
+      "articleEdit": true,
+      "articleStick": true,
+      "articleCancelStick": true,
+      "articleRemove": true,
+      "commentEdit": true,
+      "commentRemove": true,
+      "breezemoonEdit": true,
+      "breezemoonRemove": true,
+      "auditLogView": true
     },
     "fetchedAt": 1763100000000
   }
@@ -76,15 +99,15 @@
 | 一级入口 | 子模块 / 页面 | 旧后台参考入口 / 方式 | 所需角色 / 权限标识 | V3 目标接口 | 实施阶段 | 必须保留的业务边界 |
 | --- | --- | --- | --- | --- | --- | --- |
 | 工作台 | 首页概览、待办汇总、快捷入口 | `AdminProcessor#showAdminIndex`（`/admin`） | `menuAdmin` | `GET /api/v3/admin/capabilities`<br>`GET /api/v3/admin/dashboard` | 第一阶段（已提供真实待办与基础统计；历史趋势待四期评估数据源） | 缺少数据源的指标显示“未知”，禁止填零或展示模拟数字 |
-| 审核中心 | 举报审核（待处理 / 已处理 / 忽略 / 移除复读机目标） | `AdminProcessor#showReports`（`/admin/reports`）、`/admin/report/{id}`、`/admin/report/ignore/{id}`、`/admin/repeater/{id}/remove` | `menuAdminReports` | `GET /api/v3/admin/reports`<br>`POST /api/v3/admin/reports/{reportId}/handle`<br>`POST /api/v3/admin/reports/{reportId}/ignore`<br>`POST /api/v3/admin/repeater/{id}/remove` | 第一阶段代表页；二期补文章/评论/聊天上下游联动 | “标记已处理”“忽略”“删除目标”严格分离；禁止处理自己提交的举报；展示对象上下文与真实最新状态 |
+| 审核中心 | 举报审核（待处理 / 已处理 / 忽略 / 移除复读机目标） | `AdminProcessor#showReports`（`/admin/reports`）、`/admin/report/{id}`、`/admin/report/ignore/{id}`、`/admin/repeater/{id}/remove` | `menuAdminReports` | `GET /api/v3/admin/reports`<br>`POST /api/v3/admin/reports/{reportId}/handle`<br>`POST /api/v3/admin/reports/{reportId}/ignore`<br>`POST /api/v3/admin/repeater/{id}/remove` | 第一阶段代表页；二期已接入文章/评论/用户与操作审计直达联动 | “标记已处理”“忽略”“删除目标”严格分离；禁止处理自己提交的举报；展示对象上下文与真实最新状态 |
 | 审核中心 | 身份／企业认证审核 | 既有 V3 审核接口（`ApiV3IdentityApplicationProcessor`） | 指定审核人 `isIdentityReviewer`（`profile.read` / `settings.write`） | `GET /api/v3/review/identity-applications`<br>`POST /api/v3/review/identity-applications/{applicationId}/material/open`<br>`PUT /api/v3/review/identity-applications/{applicationId}/decision` | 第一阶段直接接入既有 V3 | 材料为一次性读取并删除原图：必须用户主动点击打开，严禁自动预览、预加载或失败重试；仅管理员不等于审核员；先读图再作结论；结论不自动改用户组 |
 | 审核中心 | 鱼游投稿及修改审核 | 旧鱼游管理入口（`AdminProcessor` / 对应投稿模块） | `menuAdminMisc` / 待确认专用权限 | 待新增 `/api/v3/admin/fish-games/reviews` 等 | 第三阶段 | 已上线资料与待审修改并存时需前后对照；区分待审 / 通过 / 拒绝 / 停用 |
 | 审核中心 | 大事记审核 | 旧大事记入口（`menuAdminMilestone`） | `menuAdminMilestone` | 待新增 `/api/v3/admin/milestones/reviews` 等 | 第三阶段 | 审核动作集中于审核中心，日常维护留在社区运营 |
 | 审核中心 | 图片审核 | `macro-admin.ftl` 旧图片入口（受 `rhypicEnabled` 控制） | 管理员 / 图床管理权限（`!rhypicEnabled`） | 待核实图床管理能力后设计 `/api/v3/admin/images/...` | 第三阶段（暂在工作台占位说明） | 启用 RhyPic 时旧图片审核隐藏；接入前核实实际图床管理可用性 |
-| 内容管理 | 文章管理（检索、编辑、封禁、精选、置顶、评论开关、专栏章节） | `AdminProcessor` 文章管理方法 | `menuAdminArticles` | 待新增 `/api/v3/admin/articles/...` | 第二阶段 | 不直接把用户侧发文接口冒充全站管理接口；保留专栏、章节与匿名访问字段 |
-| 内容管理 | 评论管理 | `AdminProcessor` 评论管理方法 | `menuAdminComments` | 待新增 `/api/v3/admin/comments/...` | 第二阶段 | 支持按正文 / 作者 / 状态检索与处置追溯 |
-| 内容管理 | 清风明月管理 | `AdminProcessor` 清风明月方法 | `menuAdminBreezemoons` | 待新增 `/api/v3/admin/breezemoons/...` | 第二阶段 | 处置结果即时回刷 |
-| 用户与权限 | 用户列表、用户详情、资料与状态维护、移除 MFA、永久停用 | `AdminProcessor#showUsers`（`/admin/users`）、`showUser`（`/admin/user/{id}`）、`updateUser`、`removeMFA`、`deactivateUser` | 列表/详情：`menuAdminUsers`<br>基础资料：`userUpdateUserBasic`<br>高级字段：`userUpdateUserAdvanced`<br>移除 MFA：`userRemoveMFA`<br>永久停用：仅 `adminRole` | `GET /api/v3/admin/users`<br>`GET /api/v3/admin/users/{userId}`<br>`PUT /api/v3/admin/users/{userId}`<br>`POST /api/v3/admin/users/{userId}/deactivate`<br>`POST /api/v3/admin/users/{userId}/remove-mfa` | 第一阶段代表页（覆盖查询、详情、资料/状态维护、移除 MFA、永久停用）；二期补内容/日志关联视图 | 绝不返回密码、令牌、MFA 密钥；永久停用独立危险操作，仅 `adminRole` 可用且禁止停用当前操作者本人；普通编辑表单禁止将已永久停用账号（`status = 4`）改回可用 |
+| 内容管理 | 文章管理（检索、创建、编辑、封禁/锁定、精选、置顶/取消置顶、评论开关、长文专栏章节与强制移除） | `AdminProcessor` 文章管理方法 | 列表/详情：`menuAdminArticles`<br>新建：`articleAddArticle`<br>编辑：`articleUpdateArticleBasic`<br>置顶/取消置顶：`articleStickArticle` / `articleCancelStickArticle`<br>移除：`articleRemoveArticle` | `GET /api/v3/admin/articles`<br>`POST /api/v3/admin/articles`<br>`GET /api/v3/admin/articles/{articleId}`<br>`PUT /api/v3/admin/articles/{articleId}`<br>`POST /api/v3/admin/articles/{articleId}/stick`<br>`POST /api/v3/admin/articles/{articleId}/cancel-stick`<br>`DELETE /api/v3/admin/articles/{articleId}` | 第二阶段（已上线） | 在发布锁与事务缓存边界内执行；不复用用户侧发文/删帖限制（支持强制移除未满 24h 文章）；保留专栏、章节、封面同步及匿名访问字段；编辑离开时保留未保存提示 |
+| 内容管理 | 评论管理 | `AdminProcessor` 评论管理方法 | 列表/详情：`menuAdminComments`<br>编辑：`commentUpdateCommentBasic`<br>移除：`commentRemoveComment` | `GET /api/v3/admin/comments`<br>`GET /api/v3/admin/comments/{commentId}`<br>`PUT /api/v3/admin/comments/{commentId}`<br>`DELETE /api/v3/admin/comments/{commentId}` | 第二阶段（已上线） | 支持按正文 / 作者 / 文章 / 状态检索；修改状态与删除独立确认并触发职业事件清理与 `operation` 审计 |
+| 内容管理 | 清风明月管理 | `AdminProcessor` 清风明月方法 | 列表/详情：`menuAdminBreezemoons`<br>编辑：`breezemoonUpdateBreezemoon`<br>移除：`breezemoonRemoveBreezemoon` | `GET /api/v3/admin/breezemoons`<br>`GET /api/v3/admin/breezemoons/{breezemoonId}`<br>`PUT /api/v3/admin/breezemoons/{breezemoonId}`<br>`DELETE /api/v3/admin/breezemoons/{breezemoonId}` | 第二阶段（已上线） | 处置结果即时回刷，移除同步触发 `targetRemoved` 与 `operation` 审计 |
+| 用户与权限 | 用户列表、用户详情、资料与状态维护、移除 MFA、永久停用 | `AdminProcessor#showUsers`（`/admin/users`）、`showUser`（`/admin/user/{id}`）、`updateUser`、`removeMFA`、`deactivateUser` | 列表/详情：`menuAdminUsers`<br>基础资料：`userUpdateUserBasic`<br>高级字段：`userUpdateUserAdvanced`<br>移除 MFA：`userRemoveMFA`<br>永久停用：仅 `adminRole` | `GET /api/v3/admin/users`<br>`GET /api/v3/admin/users/{userId}`<br>`PUT /api/v3/admin/users/{userId}`<br>`POST /api/v3/admin/users/{userId}/deactivate`<br>`POST /api/v3/admin/users/{userId}/remove-mfa` | 第一阶段代表页；二期已接入名下文章/评论/清风明月与双向审计日志直达 | 绝不返回密码、令牌、MFA 密钥；永久停用独立危险操作，仅 `adminRole` 可用且禁止停用当前操作者本人；普通编辑表单禁止将已永久停用账号（`status = 4`）改回可用 |
 | 用户与权限 | 角色权限配置 | `AdminProcessor` 角色管理方法 | `menuAdminRoles` | 待新增 `/api/v3/admin/roles/...` | 第三阶段 | 变更后实时影响能力校验，不得将 OP / 纪律委员批量提升为管理员 |
 | 用户与权限 | 邀请码管理 | `AdminProcessor` 邀请码方法（区分旧状态 `0/1/2`） | `menuAdminIcs` | 待新增 `/api/v3/admin/invitecodes/...` | 第三阶段 | 严格映射 `0` 已使用、`1` 未使用、`2` 停用，禁止猜通用启停枚举 |
 | 会员与资产 | 用户 VIP 开通 / 维护 / 延期 / 退款、套餐与优惠券 | `vip/admin.ftl`（侧栏之外旧入口） | 管理员 / 资产相关授权 | 待新增 `/api/v3/admin/vip/...` | 第三阶段 | 退款沿用按剩余天数计算并失效规则；优惠券次数 `-1` 表示无限制 |
@@ -94,7 +117,7 @@
 | 职业与宠物 | 职业目录、等级奖励、规则、草稿/发布/停用/回滚、导入预检、模拟、外观资产 | `ProfessionAdminProcessor` | 管理员 / 职业管理授权 | 待新增 `/api/v3/admin/professions/...` | 第四阶段 | 保留独立工作台及草稿/发布/历史/回滚；导入先预检；迁移和补发政策不得简化为单个开关 |
 | 职业与宠物 | 宠物活动与风控日志 | 旧宠物风控日志网页入口（仅管理员 Session，拒绝 apiKey） | 仅 `adminRole` | 待新增只读 `/api/v3/admin/pets/logs` | 第四阶段 | 首版严格只读，不提供改币、重置宠物或清零动作 |
 | 开放平台 | OAuth 第三方客户端列表、详情、登记、修改、停用 | 既有 V3 接口（`ApiV3ClientManagementProcessor` 等） | 仅网站第一方当前有效 `adminRole`（`profile.read` / `settings.write`） | `GET /api/v3/admin/oauth/clients`<br>`GET /api/v3/admin/oauth/clients/{clientId}`<br>`POST /api/v3/admin/oauth/clients`<br>`PUT /api/v3/admin/oauth/clients/{clientId}`<br>`DELETE /api/v3/admin/oauth/clients/{clientId}` | 第一阶段直接接入既有 V3 | 不含内置 `website_v3`；修改权限或回调集合会吊销已有令牌与授权码；停用后无启用接口 |
-| 系统与安全 | 操作审计日志、IP 管理、站点设置、安全状态与维护工具 | `AdminProcessor#showAuditlog`、`ipManage`、`menuAdminMisc`、`isSecurityOperator` | `menuAdmin` / `ipManage` / `menuAdminMisc` / `isSecurityOperator`（仅 `"adlered"`） | 待新增 `/api/v3/admin/audit-logs`、`/api/v3/admin/ips`、`/api/v3/admin/settings`、`/api/v3/admin/security/...` | 第二阶段（操作日志）与第四阶段（安全与维护） | 保留 `"adlered"` 等特殊账号限制；连接数不等于去重人数；生产开关只读、开发开关明确标注临时生效；缺失历史值不补造 |
+| 系统与安全 | 操作审计日志、IP 管理、站点设置、安全状态与维护工具 | `AdminProcessor#showAuditlog`、`ipManage`、`menuAdminMisc`、`isSecurityOperator` | `menuAdmin` / `ipManage` / `menuAdminMisc` / `isSecurityOperator`（仅 `"adlered"`） | `GET /api/v3/admin/audit-logs`（已上线）<br>待新增 `/api/v3/admin/ips`、`/api/v3/admin/settings`、`/api/v3/admin/security/...` | 第二阶段（操作日志已上线）与第四阶段（安全与维护） | 保留 `"adlered"` 等特殊账号限制；连接数不等于去重人数；生产开关只读、开发开关明确标注临时生效；缺失历史值不补造 |
 | 可选独立接入 | `website_v3` 需求反馈处理 | `website_v3/feedback-service` | 反馈服务独立管理员鉴权 | 不计入 Rhythm `/api/v3/admin/...` 覆盖范围 | 单独规划后接入 | 需独立规划跨域、签名或服务鉴权 |
 
 ## 3. 统一接口、分页、筛选与写入恢复契约

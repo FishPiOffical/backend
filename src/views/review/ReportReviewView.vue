@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import {
   fetchAdminReports,
   handleAdminReport,
@@ -540,12 +540,55 @@ onMounted(() => {
               </a>
               <span v-else class="admin-mono">{{ selectedItem.target.url }}</span>
             </div>
+            <!-- 按被举报对象类型与操作者权限提供二期管理与审计直达入口 -->
+            <div v-if="selectedItem.reportDataId" class="report-target-box__links">
+              <RouterLink
+                v-if="
+                  selectedItem.reportDataType === 0 &&
+                  auth.capabilities?.canAccessAdmin &&
+                  auth.capabilities?.permissions.menuAdminArticles
+                "
+                :to="`/content/articles/${encodeURIComponent(selectedItem.reportDataId)}`"
+                class="admin-btn admin-btn--sm"
+              >
+                前往文章详情 / 处置
+              </RouterLink>
+              <RouterLink
+                v-else-if="
+                  selectedItem.reportDataType === 1 &&
+                  auth.capabilities?.canAccessAdmin &&
+                  auth.capabilities?.permissions.menuAdminComments
+                "
+                :to="`/content/comments?commentId=${encodeURIComponent(selectedItem.reportDataId)}&keyword=${encodeURIComponent(selectedItem.reportDataId)}`"
+                class="admin-btn admin-btn--sm"
+              >
+                定位并处置评论
+              </RouterLink>
+              <RouterLink
+                v-else-if="
+                  selectedItem.reportDataType === 2 &&
+                  auth.capabilities?.canAccessAdmin &&
+                  auth.capabilities?.permissions.menuAdminUsers
+                "
+                :to="`/users/${encodeURIComponent(selectedItem.reportDataId)}`"
+                class="admin-btn admin-btn--sm"
+              >
+                前往用户详情 / 管控
+              </RouterLink>
+              <RouterLink
+                v-if="auth.capabilities?.canAccessAdmin"
+                :to="`/system/audit-logs?dataId=${encodeURIComponent(selectedItem.reportDataId)}`"
+                class="admin-btn admin-btn--sm"
+              >
+                查看对象审计记录
+              </RouterLink>
+            </div>
           </section>
 
           <!-- 独立处置操作 -->
           <section class="report-actions-box" aria-label="独立处置操作">
             <p class="report-actions-box__note">
-              规则边界：“标记已处理”、“忽略”与“移除复读机内容”相互独立；移除内容后需单独决定是否结案。
+              规则边界：“标记已处理”、“忽略”与“移除复读机内容”相互独立；跳转前往文章/评论/用户管理或移除内容后，均不会自动修改举报工单状态，需返回此处单独结案。
             </p>
 
             <div v-if="selectedItem.isOwnReport" class="report-guard-note" role="note">
@@ -795,6 +838,13 @@ onMounted(() => {
   font-size: 12px;
   color: var(--fp-muted);
   word-break: break-all;
+}
+
+.report-target-box__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
 }
 
 .report-actions-box {

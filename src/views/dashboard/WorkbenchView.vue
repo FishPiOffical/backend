@@ -66,11 +66,15 @@ const quickEntries = computed<QuickEntry[]>(() => {
 })
 
 const stageOneEntries = computed(() =>
-  quickEntries.value.filter((entry) => entry.item.phase === '一期V3' || entry.item.phase === '既有V3'),
+  quickEntries.value.filter(
+    (entry) => entry.item.phase === '一期V3' || entry.item.phase === '二期V3' || entry.item.phase === '既有V3',
+  ),
 )
 
 const previewEntries = computed(() =>
-  quickEntries.value.filter((entry) => entry.item.phase !== '一期V3' && entry.item.phase !== '既有V3'),
+  quickEntries.value.filter(
+    (entry) => entry.item.phase !== '一期V3' && entry.item.phase !== '二期V3' && entry.item.phase !== '既有V3',
+  ),
 )
 
 const statCards = computed(() => {
@@ -263,7 +267,7 @@ onMounted(() => {
           </div>
 
           <div v-if="stageOneEntries.length" class="wb-entry-group">
-            <h3 class="wb-entry-heading">已上线模块（一期新增 / 既有 V3 接口）</h3>
+            <h3 class="wb-entry-heading">已上线模块（一、二期 V3 / 既有 V3 接口）</h3>
             <div class="wb-entry-grid">
               <RouterLink
                 v-for="entry in stageOneEntries"
@@ -274,7 +278,7 @@ onMounted(() => {
                 <div class="wb-entry-card__top">
                   <span class="wb-entry-card__group">{{ entry.groupLabel }}</span>
                   <StatusBadge
-                    :tone="entry.item.phase === '一期V3' ? 'success' : 'info'"
+                    :tone="entry.item.phase === '一期V3' || entry.item.phase === '二期V3' ? 'success' : 'info'"
                     :label="entry.item.phase"
                   />
                 </div>
@@ -284,7 +288,7 @@ onMounted(() => {
           </div>
 
           <div v-if="previewEntries.length" class="wb-entry-group">
-            <h3 class="wb-entry-heading">二至四阶段建设模块（边界占位预览）</h3>
+            <h3 class="wb-entry-heading">三至四阶段建设模块（边界占位预览）</h3>
             <div class="wb-entry-grid wb-entry-grid--compact">
               <RouterLink
                 v-for="entry in previewEntries"
@@ -313,10 +317,10 @@ onMounted(() => {
             </div>
             <RouterLink
               v-if="dashboard.capabilities.canAccessAdmin"
-              to="/modules/audit-logs"
+              to="/system/audit-logs"
               class="admin-btn admin-btn--sm"
             >
-              全站审计规划
+              进入全站操作审计
             </RouterLink>
           </div>
 

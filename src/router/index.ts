@@ -91,6 +91,88 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'content/articles',
+        name: 'content-articles',
+        component: () => import('@/views/content/ArticleListView.vue'),
+        meta: {
+          title: '文章与专栏管理',
+          groupTitle: '内容管理',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && Boolean(c.permissions.menuAdminArticles),
+        },
+      },
+      {
+        path: 'content/articles/new',
+        name: 'content-article-create',
+        component: () => import('@/views/content/ArticleEditView.vue'),
+        meta: {
+          title: '新建文章',
+          groupTitle: '内容管理',
+          requiresAuth: true,
+          checkAccess: (c) => c.actions.articleCreate,
+        },
+      },
+      {
+        path: 'content/articles/:articleId',
+        name: 'content-article-edit',
+        component: () => import('@/views/content/ArticleEditView.vue'),
+        meta: {
+          title: '文章详情与编辑',
+          groupTitle: '内容管理',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && Boolean(c.permissions.menuAdminArticles),
+        },
+      },
+      {
+        path: 'content/comments',
+        name: 'content-comments',
+        component: () => import('@/views/content/CommentManageView.vue'),
+        meta: {
+          title: '评论管理',
+          groupTitle: '内容管理',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && Boolean(c.permissions.menuAdminComments),
+        },
+      },
+      {
+        path: 'content/breezemoons',
+        name: 'content-breezemoons',
+        component: () => import('@/views/content/BreezemoonManageView.vue'),
+        meta: {
+          title: '清风明月管理',
+          groupTitle: '内容管理',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && Boolean(c.permissions.menuAdminBreezemoons),
+        },
+      },
+      {
+        path: 'system/audit-logs',
+        name: 'system-audit-logs',
+        component: () => import('@/views/system/AuditLogView.vue'),
+        meta: {
+          title: '全站操作审计日志',
+          groupTitle: '系统与安全',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin,
+        },
+      },
+      {
+        path: 'modules/articles',
+        redirect: '/content/articles',
+      },
+      {
+        path: 'modules/comments',
+        redirect: '/content/comments',
+      },
+      {
+        path: 'modules/breezemoons',
+        redirect: '/content/breezemoons',
+      },
+      {
+        path: 'modules/audit-logs',
+        redirect: '/system/audit-logs',
+      },
+      {
         path: 'oauth/clients',
         name: 'oauth-clients',
         component: () => import('@/views/oauth/OAuthClientView.vue'),
