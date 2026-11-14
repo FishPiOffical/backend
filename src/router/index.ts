@@ -330,6 +330,72 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'professions',
+        name: 'professions-workbench',
+        component: () => import('@/views/professions/ProfessionWorkbenchView.vue'),
+        meta: {
+          title: '职业配置工作台',
+          groupTitle: '职业与宠物',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && c.isAdmin,
+        },
+      },
+      {
+        path: 'professions/pet-logs',
+        name: 'pets-logs',
+        component: () => import('@/views/professions/PetLogsView.vue'),
+        meta: {
+          title: '宠物活动与风控日志',
+          groupTitle: '职业与宠物',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && c.isAdmin,
+        },
+      },
+      {
+        path: 'system/site-settings',
+        name: 'system-site-settings',
+        component: () => import('@/views/system/SiteSettingsView.vue'),
+        meta: {
+          title: 'IP 与站点配置',
+          groupTitle: '系统与安全',
+          requiresAuth: true,
+          checkAccess: (c) =>
+            c.canAccessAdmin && Boolean(c.permissions.ipManage || c.permissions.menuAdminMisc),
+        },
+      },
+      {
+        path: 'system/security-tools',
+        name: 'system-security-tools',
+        component: () => import('@/views/system/SecurityToolsView.vue'),
+        meta: {
+          title: '安全状态与维护工具',
+          groupTitle: '系统与安全',
+          requiresAuth: true,
+          checkAccess: (c) =>
+            c.canAccessAdmin &&
+            (c.isSecurityOperator ||
+              Boolean(
+                c.permissions.articleReindexArticleIndex || c.permissions.articleReindexArticlesIndex,
+              )),
+        },
+      },
+      {
+        path: 'modules/professions',
+        redirect: '/professions',
+      },
+      {
+        path: 'modules/pets-logs',
+        redirect: '/professions/pet-logs',
+      },
+      {
+        path: 'modules/site-settings',
+        redirect: '/system/site-settings',
+      },
+      {
+        path: 'modules/security-tools',
+        redirect: '/system/security-tools',
+      },
+      {
         path: 'modules/:moduleId',
         name: 'module-placeholder',
         component: () => import('@/views/common/ModulePlaceholderView.vue'),

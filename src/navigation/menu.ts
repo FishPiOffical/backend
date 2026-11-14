@@ -8,7 +8,7 @@ export interface AdminNavItem {
   id: string
   label: string
   to: string
-  phase: '一期V3' | '二期V3' | '三期V3' | '既有V3' | '二期' | '三期' | '四期'
+  phase: '一期V3' | '二期V3' | '三期V3' | '四期V3' | '既有V3' | '二期' | '三期' | '四期'
   check?: (caps: AdminCapabilities) => boolean
   hideWhenRhypic?: boolean
 }
@@ -219,15 +219,15 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
       {
         id: 'professions',
         label: '职业配置工作台',
-        to: '/modules/professions',
-        phase: '四期',
+        to: '/professions',
+        phase: '四期V3',
         check: (c) => c.canAccessAdmin && c.isAdmin,
       },
       {
         id: 'pets-logs',
         label: '宠物活动与风控日志',
-        to: '/modules/pets-logs',
-        phase: '四期',
+        to: '/professions/pet-logs',
+        phase: '四期V3',
         check: (c) => c.canAccessAdmin && c.isAdmin,
       },
     ],
@@ -261,73 +261,25 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
       {
         id: 'site-settings',
         label: 'IP 与站点配置',
-        to: '/modules/site-settings',
-        phase: '四期',
+        to: '/system/site-settings',
+        phase: '四期V3',
         check: (c) =>
           c.canAccessAdmin && Boolean(c.permissions.ipManage || c.permissions.menuAdminMisc),
       },
       {
         id: 'security-tools',
         label: '安全状态与维护工具',
-        to: '/modules/security-tools',
-        phase: '四期',
-        check: (c) => c.canAccessAdmin && (c.isAdmin || c.isSecurityOperator),
+        to: '/system/security-tools',
+        phase: '四期V3',
+        check: (c) =>
+          c.canAccessAdmin &&
+          (c.isSecurityOperator ||
+            Boolean(
+              c.permissions.articleReindexArticleIndex || c.permissions.articleReindexArticlesIndex,
+            )),
       },
     ],
   },
 ]
 
-export const PLACEHOLDER_MODULES: Record<string, PlaceholderModuleSpec> = {
-  professions: {
-    id: 'professions',
-    groupLabel: '职业与宠物',
-    title: '职业配置独立编辑工作台',
-    phase: '四期',
-    requiredPermissionDesc: '管理员权限',
-    legacyEntry: '/admin',
-    legacyLabel: '前往旧版管理后台',
-    summary: '第四阶段实现：职业目录、等级奖励、自动化规则、草稿/发布/停用/复制/历史回滚与导入预检模拟。',
-    constraints: ['导入配置必须先经预检对比', '迁移与奖励补发政策不可简化为单个启用开关'],
-    check: (c) => c.canAccessAdmin && c.isAdmin,
-  },
-  'pets-logs': {
-    id: 'pets-logs',
-    groupLabel: '职业与宠物',
-    title: '宠物活动与风控日志（只读）',
-    phase: '四期',
-    requiredPermissionDesc: '管理员权限',
-    legacyEntry: '/admin',
-    legacyLabel: '前往旧版管理后台',
-    summary: '第四阶段提供严格只读的宠物活动与风控日志检索，对齐原网页 Session 鉴权门槛。',
-    constraints: ['首版严格只读，不提供改币、重置宠物或清零操作'],
-    check: (c) => c.canAccessAdmin && c.isAdmin,
-  },
-  'site-settings': {
-    id: 'site-settings',
-    groupLabel: '系统与安全',
-    title: 'IP 管理与站点杂项配置',
-    phase: '四期',
-    requiredPermissionDesc: 'ipManage / menuAdminMisc',
-    legacyEntry: '/admin',
-    legacyLabel: '前往旧版管理后台',
-    summary: '第四阶段实现：IP 封禁库维护与开放注册、匿名访问、发帖/评论开关等站点配置。',
-    constraints: ['高危配置调整须二次确认与幂等保障'],
-    check: (c) => c.canAccessAdmin,
-  },
-  'security-tools': {
-    id: 'security-tools',
-    groupLabel: '系统与安全',
-    title: '安全状态、爬虫观测与维护工具',
-    phase: '四期',
-    requiredPermissionDesc: '特定安全操作员（如 adlered）或管理员维护授权',
-    legacyEntry: '/admin',
-    legacyLabel: '前往旧版管理后台',
-    summary: '第四阶段实现：安全状态总览、连接统计、爬虫观测与索引维护工具。',
-    constraints: [
-      '保留特殊账号授权（如安全操作员），不得扩大为所有管理员通用权限',
-      '生产开关只读，开发开关需明确标识为重启失效的临时状态',
-      '连接数不等于去重人数，运行期有界数据不冒充长期全量审计',
-    ],
-    check: (c) => c.canAccessAdmin,
-  },
-}
+export const PLACEHOLDER_MODULES: Record<string, PlaceholderModuleSpec> = {}
