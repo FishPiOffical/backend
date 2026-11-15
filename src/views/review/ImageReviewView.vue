@@ -47,8 +47,10 @@ async function mark(row: ReviewImageItem, decision: 'normal' | 'illegal') {
   actingId.value = row.oId
   toast.value = ''
   try {
-    await reviewImage(row.oId, decision, createIdempotencyKey('image-review'))
-    toast.value = decision === 'normal' ? '已标记为正常图片' : '已标记为违规图片并隐藏'
+    const result = await reviewImage(row.oId, decision, createIdempotencyKey('image-review'))
+    toast.value = result.reviewed !== 1
+      ? '图片云端审核结果待核对，请勿重复处理'
+      : decision === 'normal' ? '已标记为正常图片' : '已标记为违规图片并隐藏'
     await load(pagination.value.page)
   } catch (err) {
     toast.value = err instanceof ApiError ? err.message : '图片审核操作失败'
@@ -86,10 +88,11 @@ onMounted(() => {
             <img :src="row.path" :alt="row.md5 || row.oId" class="preview-img" loading="lazy" />
             <div class="card-meta">
               <div><strong>上传者：</strong>{{ row.userName || '-' }}</div>
-              <div><strong>IP：</strong>{{ row.ip || '-' }}</div>
+              <div v-if="row.reviewStatus === 'UNKNOWN'">云端结果待核对</div>
+              <div v-else-if="row.reviewStatus === 'IN_PROGRESS'">已有审核任务</div>
               <div class="btn-row">
-                <button class="admin-btn admin-btn--sm admin-btn--primary" :disabled="actingId === row.oId" @click="mark(row, 'normal')">正常</button>
-                <button class="admin-btn admin-btn--sm admin-btn--danger" :disabled="actingId === row.oId" @click="mark(row, 'illegal')">违规</button>
+                <button class="admin-btn admin-btn--sm admin-btn--primary" :disabled="actingId === row.oId || row.reviewStatus === 'UNKNOWN'" @click="mark(row, 'normal')">正常</button>
+                <button class="admin-btn admin-btn--sm admin-btn--danger" :disabled="actingId === row.oId || row.reviewStatus === 'UNKNOWN'" @click="mark(row, 'illegal')">违规</button>
               </div>
             </div>
           </article>

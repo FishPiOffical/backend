@@ -111,8 +111,8 @@ async function handleImportFish() {
       toast.value = '导入内容必须是 JSON 数组'
       return
     }
-    await importFishGames(parsed, createIdempotencyKey('fg-import'))
-    toast.value = `已导入 ${parsed.length} 条鱼游`
+    const result = await importFishGames(parsed, createIdempotencyKey('fg-import'))
+    toast.value = `已导入 ${result.imported} 条鱼游，跳过 ${result.skipped} 条`
     await loadFish()
   } catch (err) {
     toast.value = err instanceof ApiError ? err.message : '导入鱼游失败，请检查 JSON 格式'

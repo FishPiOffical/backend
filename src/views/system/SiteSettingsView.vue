@@ -123,10 +123,18 @@ async function submitMiscSettings() {
   try {
     const payload: Record<string, string> = {}
     for (const item of miscOptions.value) {
-      payload[item.oId] = miscDraft[item.oId] ?? ''
+      const value = miscDraft[item.oId]
+      if (item.writable && value !== undefined && value !== String(item.optionValue ?? '')) {
+        payload[item.oId] = value
+      }
+    }
+    if (!Object.keys(payload).length) {
+      miscNotice.value = '没有可保存的配置变更'
+      return
     }
     const res = await updateMiscSettings(payload, createIdempotencyKey('misc'))
     miscOptions.value = res.options ?? miscOptions.value
+    for (const item of miscOptions.value) miscDraft[item.oId] = String(item.optionValue ?? '')
     miscNotice.value = `已保存 ${res.updatedCount} 项站点配置${res.replayed ? '（幂等重放）' : ''}`
   } catch (err) {
     miscError.value = extractError(err)
@@ -213,7 +221,7 @@ onMounted(loadAll)
             <p class="admin-panel__desc">维护开放注册、发帖/评论、匿名浏览等杂项参数。</p>
           </div>
           <button type="button" class="admin-btn admin-btn--primary" :disabled="miscBusy" @click="submitMiscSettings">
-            {{ miscBusy ? '保存中...' : '保存全部配置' }}
+            {{ miscBusy ? '保存中...' : '保存配置变更' }}
           </button>
         </header>
 
@@ -232,7 +240,10 @@ onMounted(loadAll)
               <tr v-for="opt in miscOptions" :key="opt.oId">
                 <td><code class="admin-mono">{{ opt.oId }}</code></td>
                 <td>
-                  <input :aria-label="`配置值：${opt.oId}`" v-model="miscDraft[opt.oId]" class="admin-input" />
+                  <select v-if="opt.writable" :aria-label="`配置值：${opt.oId}`" v-model="miscDraft[opt.oId]" class="admin-input">
+                    <option v-for="value in opt.allowedValues" :key="value" :value="value">{{ value }}</option>
+                  </select>
+                  <span v-else>{{ opt.optionValue }}</span>
                 </td>
               </tr>
             </tbody>

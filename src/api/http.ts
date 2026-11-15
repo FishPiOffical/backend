@@ -392,7 +392,7 @@ export function createIdempotencyKey(prefix: string): string {
  */
 export function isUnknownOutcomeError(error: unknown): boolean {
   if (error instanceof ApiError) {
-    return error.unknownOutcome || error.status === 0 || error.status === 408 || error.status >= 500
+    return error.errorCode === 'operation_outcome_unknown' || error.unknownOutcome || error.status === 0 || error.status === 408 || error.status >= 500
   }
   return false
 }

@@ -1,5 +1,5 @@
 import { ref, shallowRef } from 'vue'
-import { ApiError, getAuthContextVersion, onAccessTokenChange, requestData, type RequestOptions } from '@/api/http'
+import { ApiError, getAuthContextVersion, isUnknownOutcomeError, onAccessTokenChange, requestData, type RequestOptions } from '@/api/http'
 
 // 仅内存保留冻结请求；跨页面保持，退出或切换身份后清除，普通令牌刷新不清除。
 interface PendingAssetWrite { path: string; options: RequestOptions; epoch: number }
@@ -30,7 +30,7 @@ async function execute<T>(task: PendingAssetWrite): Promise<T> {
     if (task.epoch === getAuthContextVersion()) {
       // 已有未知结果时，权限/业务拒绝也不能证明上次未提交，保留原任务供核实。
       assetRecoveryMessage.value = error instanceof Error ? error.message : '操作结果待确认'
-      if (!(error instanceof ApiError) || error.unknownOutcome) pendingAssetWrite.value = task
+      if (!(error instanceof ApiError) || isUnknownOutcomeError(error)) pendingAssetWrite.value = task
     }
     throw error
   } finally {
@@ -39,7 +39,9 @@ async function execute<T>(task: PendingAssetWrite): Promise<T> {
 }
 
 export async function assetRequestData<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  if (!options.idempotentWrite || !/^\/api\/v3\/admin\/(vip|coupons|medals|points|bags|salary)(\/|$)/.test(path)) {
+  const recoverable = /^\/api\/v3\/admin\/(vip|coupons|medals|points|bags|salary)(\/|$)/.test(path)
+    || path === '/api/v3/admin/fish-games/import'
+  if (!options.idempotentWrite || !recoverable) {
     return requestData<T>(path, options)
   }
   if (pendingAssetWrite.value || assetRecoveryBusy.value) {
@@ -56,7 +58,10 @@ export async function recoverAssetWrite(): Promise<void> {
   try {
     const result = await execute<unknown>(task)
     assetRecoveryReceipt.value = result
-    assetRecoveryMessage.value = '原操作已确认。请刷新当前列表查看最新状态；批量结果见下方回执。'
+    const legacy = typeof result === 'object' && result !== null && 'legacyReceipt' in result && result.legacyReceipt === true
+    assetRecoveryMessage.value = legacy
+      ? '已找到历史回执。旧版没有记录完整请求内容，请对照当前业务状态核对。'
+      : '原操作已确认。请刷新当前列表查看最新状态；批量结果见下方回执。'
   } catch { /* 错误已写入恢复提示，继续保留原请求。 */ }
 }
 

@@ -352,6 +352,7 @@ export interface MilestoneItem {
 }
 
 export interface ReviewImageItem {
+  reviewStatus?: 'PENDING' | 'IN_PROGRESS' | 'UNKNOWN'
   oId: string
   type: string
   userName: string
@@ -387,7 +388,7 @@ export async function exportFishGames(): Promise<{ items: FishGameItem[] }> {
 }
 
 export async function importFishGames(items: Record<string, unknown>[], idempotencyKey: string) {
-  return requestData('/api/v3/admin/fish-games/import', writeOpts('POST', idempotencyKey, { items }))
+  return requestData<{ imported: number; skipped: number }>('/api/v3/admin/fish-games/import', writeOpts('POST', idempotencyKey, { items }))
 }
 
 export async function fetchMilestones(params: { p?: number; size?: number; status?: string | number; keyword?: string }): Promise<{
@@ -410,7 +411,7 @@ export async function fetchReviewImages(p = 1, size = 20): Promise<{ items: Revi
 }
 
 export async function reviewImage(imageId: string, decision: 'normal' | 'illegal', idempotencyKey: string) {
-  return requestData(`/api/v3/admin/images/${encodeURIComponent(imageId)}/review`, writeOpts('POST', idempotencyKey, { decision }))
+  return requestData<{ reviewed: number; status?: 'SUCCEEDED' | 'UNKNOWN' }>(`/api/v3/admin/images/${encodeURIComponent(imageId)}/review`, writeOpts('POST', idempotencyKey, { decision }))
 }
 
 // ==================== 领域、标签、保留词与广告位 ====================

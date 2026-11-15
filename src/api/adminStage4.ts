@@ -81,6 +81,8 @@ export interface MiscOptionItem {
   oId: string
   optionValue: string
   optionCategory?: string
+  writable?: boolean
+  allowedValues?: string[]
   [key: string]: unknown
 }
 
