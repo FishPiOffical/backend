@@ -391,9 +391,12 @@ onMounted(() => {
 }
 
 .wb-todo-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow: hidden;
+  border-top: 3px solid var(--fp-primary);
 }
 
 .wb-todo-card__top {
@@ -404,15 +407,16 @@ onMounted(() => {
 }
 
 .wb-todo-card__label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--fp-head);
 }
 
 .wb-todo-card__value {
-  font-size: 32px;
-  font-weight: 600;
-  line-height: 1.2;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   color: var(--fp-title);
 }
 
@@ -511,18 +515,24 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 12px 14px;
+  padding: 13px 15px;
   border-radius: var(--fp-radius-md);
   border: 1px solid var(--fp-border);
   background: var(--fp-elevated);
   color: var(--fp-title);
-  transition: border-color var(--fp-transition-fast), background-color var(--fp-transition-fast);
+  transition:
+    border-color var(--fp-transition-fast),
+    background-color var(--fp-transition-fast),
+    transform var(--fp-transition-fast),
+    box-shadow var(--fp-transition-fast);
 }
 
 .wb-entry-card:hover {
   border-color: var(--fp-primary);
-  background: var(--fp-hover);
+  background: var(--fp-card);
   color: var(--fp-title);
+  transform: translateY(-1px);
+  box-shadow: var(--fp-card-hover-shadow);
 }
 
 .wb-entry-card--muted {

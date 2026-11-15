@@ -140,45 +140,60 @@ onMounted(loadAll)
 
 <template>
   <PageStateView :state="pageState" :error-message="loadError" @retry="loadAll">
-    <div style="display: flex; flex-direction: column; gap: 16px">
-      <section v-if="canIpManage" class="panel">
-        <header class="panel-header">
+    <div class="admin-page">
+      <header class="admin-page__header">
+        <div>
+          <h1 class="admin-page__title">IP 与站点杂项配置</h1>
+          <p class="admin-page__subtitle">统一管理 IP 封禁策略、防火墙/验证码盾状态与全站杂项参数开关。</p>
+        </div>
+        <div class="admin-page__actions">
+          <button type="button" class="admin-btn" :disabled="loading" @click="loadAll">刷新状态</button>
+        </div>
+      </header>
+
+      <section v-if="canIpManage" class="admin-panel admin-stack">
+        <header class="admin-panel__header">
           <div>
-            <div style="display: flex; align-items: center; gap: 10px">
-              <h2 class="panel-title">IP 封禁与白名单管理</h2>
+            <div class="admin-panel__title-row">
+              <h2 class="admin-panel__title">IP 封禁与白名单管理</h2>
               <StatusBadge label="ipManage" tone="info" />
             </div>
-            <p class="panel-desc">批量封禁/解封 IP，自动同步防火墙与验证码盾策略并写入操作日志。</p>
+            <p class="admin-panel__desc">批量封禁/解封 IP，自动同步防火墙与验证码盾策略并写入操作日志。</p>
           </div>
-          <button type="button" class="btn" :disabled="loading" @click="loadAll">刷新状态</button>
         </header>
 
-        <div v-if="ipStatus" style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px">
+        <div v-if="ipStatus" class="admin-row">
           <StatusBadge :label="`CC 防火墙: ${ipStatus.firewallEnabled ? '开启' : '关闭'}`" :tone="ipStatus.firewallEnabled ? 'success' : 'neutral'" />
           <StatusBadge :label="`阈值: ${ipStatus.threshold}/分`" tone="info" />
           <StatusBadge :label="`验证盾: ${ipStatus.verificationEnabled ? '开启' : '关闭'}`" :tone="ipStatus.verificationEnabled ? 'success' : 'neutral'" />
           <StatusBadge :label="`首访验证码: ${ipStatus.firstVisitCaptchaEnabled ? '开启' : '关闭'}`" :tone="ipStatus.firstVisitCaptchaEnabled ? 'warning' : 'neutral'" />
         </div>
 
-        <div v-if="ipNotice" class="alert alert-success">{{ ipNotice }}</div>
-        <div v-if="ipError" class="alert alert-danger">{{ ipError }}</div>
+        <div v-if="ipNotice" class="admin-alert admin-alert--success">{{ ipNotice }}</div>
+        <div v-if="ipError" class="admin-alert admin-alert--danger">{{ ipError }}</div>
 
-        <div style="display: flex; flex-direction: column; gap: 10px; max-width: 640px">
-          <select v-model="ipAction" class="select" style="max-width: 220px">
-            <option value="ban">批量封禁 IP（撤销验证码豁免）</option>
-            <option value="unban">批量解封 IP（同步解除验证码盾）</option>
-          </select>
-          <textarea
-            v-model="ipListText"
-            class="input"
-            rows="4"
-            placeholder="每行或逗号分隔输入 IP 地址（单次最多 500 条）"
-          />
-          <div>
+        <div class="admin-stack admin-stack--sm" style="max-width: 640px">
+          <div class="admin-field">
+            <label class="admin-field__label">操作类型</label>
+            <select v-model="ipAction" class="admin-select" style="max-width: 260px">
+              <option value="ban">批量封禁 IP（撤销验证码豁免）</option>
+              <option value="unban">批量解封 IP（同步解除验证码盾）</option>
+            </select>
+          </div>
+          <div class="admin-field">
+            <label class="admin-field__label">IP 列表</label>
+            <textarea
+              v-model="ipListText"
+              class="admin-textarea"
+              rows="4"
+              placeholder="每行或逗号分隔输入 IP 地址（单次最多 500 条）"
+            />
+          </div>
+          <div class="admin-row">
             <button
               type="button"
-              class="btn"
-              :class="ipAction === 'ban' ? 'btn-danger' : 'btn-primary'"
+              class="admin-btn"
+              :class="ipAction === 'ban' ? 'admin-btn--danger' : 'admin-btn--primary'"
               :disabled="ipBusy"
               @click="submitIpAction"
             >
@@ -188,25 +203,25 @@ onMounted(loadAll)
         </div>
       </section>
 
-      <section v-if="canMiscManage" class="panel">
-        <header class="panel-header">
+      <section v-if="canMiscManage" class="admin-panel admin-stack">
+        <header class="admin-panel__header">
           <div>
-            <div style="display: flex; align-items: center; gap: 10px">
-              <h2 class="panel-title">站点杂项配置</h2>
+            <div class="admin-panel__title-row">
+              <h2 class="admin-panel__title">站点杂项配置</h2>
               <StatusBadge label="menuAdminMisc" tone="warning" />
             </div>
-            <p class="panel-desc">维护开放注册、发帖/评论、匿名浏览等杂项参数。</p>
+            <p class="admin-panel__desc">维护开放注册、发帖/评论、匿名浏览等杂项参数。</p>
           </div>
-          <button type="button" class="btn btn-primary" :disabled="miscBusy" @click="submitMiscSettings">
+          <button type="button" class="admin-btn admin-btn--primary" :disabled="miscBusy" @click="submitMiscSettings">
             {{ miscBusy ? '保存中...' : '保存全部配置' }}
           </button>
         </header>
 
-        <div v-if="miscNotice" class="alert alert-success">{{ miscNotice }}</div>
-        <div v-if="miscError" class="alert alert-danger">{{ miscError }}</div>
+        <div v-if="miscNotice" class="admin-alert admin-alert--success">{{ miscNotice }}</div>
+        <div v-if="miscError" class="admin-alert admin-alert--danger">{{ miscError }}</div>
 
-        <div class="table-wrap">
-          <table class="data-table">
+        <div class="admin-table-wrap">
+          <table class="admin-table">
             <thead>
               <tr>
                 <th style="width: 280px">配置项 ID</th>
@@ -215,9 +230,9 @@ onMounted(loadAll)
             </thead>
             <tbody>
               <tr v-for="opt in miscOptions" :key="opt.oId">
-                <td><code>{{ opt.oId }}</code></td>
+                <td><code class="admin-mono">{{ opt.oId }}</code></td>
                 <td>
-                  <input v-model="miscDraft[opt.oId]" class="input" style="width: 100%" />
+                  <input v-model="miscDraft[opt.oId]" class="admin-input" />
                 </td>
               </tr>
             </tbody>

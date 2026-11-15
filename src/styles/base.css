@@ -38,18 +38,19 @@
 
   --fp-radius-sm: 6px;
   --fp-radius-md: 8px;
-  --fp-radius-lg: 10px;
-  --fp-radius-xl: 14px;
+  --fp-radius-lg: 12px;
+  --fp-radius-xl: 16px;
 
   --fp-control-height: 36px;
   --fp-touch-target: 44px;
-  --fp-sidebar-w: 240px;
-  --fp-sidebar-collapsed-w: 64px;
-  --fp-topbar-h: 60px;
+  --fp-sidebar-w: 248px;
+  --fp-sidebar-collapsed-w: 68px;
+  --fp-topbar-h: 58px;
+  --fp-content-max-w: 1440px;
   --fp-content-gap: 20px;
   --fp-table-row-h: 48px;
   --fp-table-row-compact-h: 38px;
-  --fp-transition-fast: 155ms ease;
+  --fp-transition-fast: 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 *,
@@ -67,8 +68,9 @@ body {
   color: var(--fp-text);
   font-family: var(--fp-font-sans);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 a {
@@ -107,32 +109,39 @@ textarea:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+.admin-muted {
+  color: var(--fp-muted);
+}
+
+/* 页面主骨架与排版层级 */
 .admin-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   min-width: 0;
 }
 
 .admin-page__header {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 12px 16px;
 }
 
 .admin-page__title {
   margin: 0;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   line-height: 1.3;
+  letter-spacing: -0.015em;
   color: var(--fp-title);
 }
 
 .admin-page__subtitle {
   margin: 4px 0 0;
   font-size: 13px;
+  line-height: 1.5;
   color: var(--fp-muted);
 }
 
@@ -143,17 +152,122 @@ textarea:focus-visible {
   gap: 8px;
 }
 
+/* 卡片面板与内部分区标题 */
 .admin-panel {
   background: var(--fp-card);
   border: 1px solid var(--fp-border);
   border-radius: var(--fp-radius-lg);
   box-shadow: var(--fp-card-shadow);
-  padding: 18px 20px;
+  padding: 20px 22px;
+  min-width: 0;
+}
+
+.admin-panel + .admin-panel {
+  margin-top: 18px;
 }
 
 .admin-panel--subtle {
   background: var(--fp-elevated);
   box-shadow: none;
+}
+
+.admin-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 16px;
+}
+
+.admin-panel__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-panel__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--fp-title);
+}
+
+.admin-panel__desc {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--fp-muted);
+}
+
+/* 通用布局辅助类 */
+.admin-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.admin-stack--sm {
+  gap: 10px;
+}
+
+.admin-stack--lg {
+  gap: 20px;
+}
+
+.admin-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 16px;
+}
+
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.admin-field__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fp-title);
+}
+
+.admin-field__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--fp-muted);
+}
+
+.admin-code-block {
+  margin: 8px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--fp-radius-md);
+  border: 1px solid var(--fp-border);
+  background: var(--fp-elevated);
+  color: var(--fp-text);
+  font-family: var(--fp-font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  max-width: 100%;
+  max-height: 320px;
+  overflow: auto;
 }
 
 /* 通用按钮控件 */
@@ -178,6 +292,7 @@ textarea:focus-visible {
     background-color var(--fp-transition-fast),
     border-color var(--fp-transition-fast),
     color var(--fp-transition-fast),
+    transform var(--fp-transition-fast),
     opacity var(--fp-transition-fast);
 }
 
@@ -186,9 +301,25 @@ textarea:focus-visible {
   border-color: var(--fp-muted);
 }
 
+.admin-btn:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+
 .admin-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.48;
   cursor: not-allowed;
+}
+
+.admin-btn--ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--fp-muted);
+}
+
+.admin-btn--ghost:hover:not(:disabled) {
+  background: var(--fp-hover);
+  border-color: transparent;
+  color: var(--fp-title);
 }
 
 .admin-btn--primary {
@@ -275,15 +406,19 @@ textarea:focus-visible {
 
 /* 状态页签与筛选栏 */
 .admin-tabs {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--fp-radius-md);
+  background: var(--fp-surface-subtle);
+  border: 1px solid var(--fp-border);
 }
 
 .admin-tab {
-  min-height: 34px;
+  min-height: 30px;
   padding: 0 12px;
-  border-radius: var(--fp-radius-sm);
+  border-radius: calc(var(--fp-radius-sm) - 1px);
   border: 1px solid transparent;
   background: transparent;
   color: var(--fp-muted);
@@ -291,18 +426,22 @@ textarea:focus-visible {
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color var(--fp-transition-fast), color var(--fp-transition-fast);
+  transition:
+    background-color var(--fp-transition-fast),
+    color var(--fp-transition-fast),
+    box-shadow var(--fp-transition-fast);
 }
 
 .admin-tab:hover {
-  background: var(--fp-hover);
   color: var(--fp-title);
 }
 
 .admin-tab.is-active {
-  background: var(--fp-primary-soft);
+  background: var(--fp-card);
   color: var(--fp-primary);
-  border-color: transparent;
+  border-color: var(--fp-border);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  font-weight: 600;
 }
 
 .admin-filters {
@@ -312,9 +451,46 @@ textarea:focus-visible {
   gap: 10px;
 }
 
+.admin-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.admin-filter-bar > .admin-input,
+.admin-filter-bar > .admin-select {
+  flex: 1 1 180px;
+  width: auto;
+}
+
+/* 提示条 */
+.admin-alert {
+  padding: 11px 14px;
+  border-radius: var(--fp-radius-md);
+  border: 1px solid transparent;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.admin-alert--success {
+  background: var(--fp-primary-soft);
+  border-color: var(--fp-primary-border);
+  color: var(--fp-title);
+}
+
+.admin-alert--danger {
+  background: var(--fp-danger-soft);
+  border-color: rgba(220, 38, 38, 0.25);
+  color: var(--fp-danger-ink);
+}
+
 /* 数据表格 */
 .admin-table-wrap {
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
   border: 1px solid var(--fp-border);
   border-radius: var(--fp-radius-lg);
@@ -326,19 +502,22 @@ textarea:focus-visible {
   border-collapse: collapse;
   text-align: left;
   font-size: 13px;
+  font-variant-numeric: tabular-nums;
 }
 
 .admin-table th,
 .admin-table td {
-  padding: 10px 14px;
+  padding: 11px 14px;
   border-bottom: 1px solid var(--fp-border);
   vertical-align: middle;
 }
 
 .admin-table thead th {
-  background: var(--fp-elevated);
+  background: var(--fp-table-head);
   color: var(--fp-head);
+  font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.02em;
   white-space: nowrap;
 }
 
@@ -357,21 +536,32 @@ textarea:focus-visible {
 
 .admin-table--compact th,
 .admin-table--compact td {
-  padding: 7px 12px;
+  padding: 8px 12px;
 }
 
 .admin-table--compact tbody tr {
   min-height: var(--fp-table-row-compact-h);
 }
 
-/* 移动端适配：增大触控目标并将输入字号设为 16px 防止 iOS 自动缩放 */
+.admin-table__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 响应式与移动端触控适配 */
 @media (max-width: 768px) {
+  .admin-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
   .admin-page__title {
-    font-size: 21px;
+    font-size: 20px;
   }
 
   .admin-panel {
-    padding: 14px 16px;
+    padding: 16px;
   }
 
   .admin-btn,
@@ -388,5 +578,20 @@ textarea:focus-visible {
   .admin-textarea {
     min-height: var(--fp-touch-target);
     font-size: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-filter-bar {
+    align-items: stretch;
+  }
+
+  .admin-filter-bar > * {
+    flex-basis: 100%;
+  }
+
+  .admin-btn,
+  .admin-btn--sm {
+    min-height: 44px;
   }
 }

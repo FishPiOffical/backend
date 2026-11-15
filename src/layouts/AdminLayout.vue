@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
+import AssetRecoveryBanner from '@/components/common/AssetRecoveryBanner.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import { ADMIN_NAV_GROUPS, type AdminNavItem } from '@/navigation/menu'
 import { useAuthStore } from '@/stores/auth'
@@ -179,6 +180,9 @@ async function handleLogout(): Promise<void> {
               alt=""
               class="shell-user__avatar"
             />
+            <span v-else class="shell-user__avatar shell-user__avatar--fallback" aria-hidden="true">
+              {{ (auth.capabilities.userName || 'A').slice(0, 1).toUpperCase() }}
+            </span>
             <div class="shell-user__meta">
               <strong>{{ auth.capabilities.userName }}</strong>
               <span>{{ auth.capabilities.roleName }}</span>
@@ -187,7 +191,7 @@ async function handleLogout(): Promise<void> {
 
           <button
             type="button"
-            class="admin-btn admin-btn--sm"
+            class="admin-btn admin-btn--sm admin-btn--ghost"
             title="立即向后端重拉当前角色权限"
             @click="auth.refreshCapabilities()"
           >
@@ -212,7 +216,10 @@ async function handleLogout(): Promise<void> {
       </div>
 
       <main class="shell-content">
-        <RouterView />
+        <div class="shell-content__inner">
+          <AssetRecoveryBanner />
+          <RouterView />
+        </div>
       </main>
     </div>
   </div>
@@ -237,7 +244,7 @@ async function handleLogout(): Promise<void> {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--fp-nav);
+  background: var(--fp-sidebar-bg);
   border-right: 1px solid var(--fp-border);
   z-index: 40;
 }
@@ -248,7 +255,7 @@ async function handleLogout(): Promise<void> {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 0 12px;
+  padding: 0 12px 0 14px;
   border-bottom: 1px solid var(--fp-border);
 }
 
@@ -265,12 +272,14 @@ async function handleLogout(): Promise<void> {
   height: 32px;
   flex-shrink: 0;
   border-radius: var(--fp-radius-md);
-  background: var(--fp-primary-fill);
+  background: linear-gradient(135deg, var(--fp-primary) 0%, var(--fp-primary-fill) 100%);
   color: #ffffff;
   font-weight: 700;
+  font-size: 15px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 6px rgba(54, 117, 46, 0.25);
 }
 
 .shell-brand__text {
@@ -282,6 +291,7 @@ async function handleLogout(): Promise<void> {
 
 .shell-brand__text strong {
   font-size: 14px;
+  font-weight: 600;
   color: var(--fp-title);
   white-space: nowrap;
 }
@@ -291,13 +301,18 @@ async function handleLogout(): Promise<void> {
   color: var(--fp-muted);
 }
 
+.shell-collapse-btn {
+  padding: 0 8px;
+  min-width: 28px;
+}
+
 .shell-nav {
   flex: 1;
   overflow-y: auto;
-  padding: 12px 8px;
+  padding: 14px 10px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .shell-group__title {
@@ -305,14 +320,21 @@ async function handleLogout(): Promise<void> {
   font-size: 11px;
   font-weight: 600;
   color: var(--fp-muted);
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .shell-group__short {
   text-align: center;
   font-size: 11px;
+  font-weight: 600;
   color: var(--fp-muted);
-  padding: 2px 0 4px;
+  padding: 4px 0;
+  border-top: 1px solid var(--fp-border);
+}
+
+.shell-group:first-child .shell-group__short {
+  border-top: none;
 }
 
 .shell-group__list {
@@ -325,15 +347,21 @@ async function handleLogout(): Promise<void> {
 }
 
 .shell-nav__item {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   min-height: 36px;
   padding: 6px 10px;
-  border-radius: var(--fp-radius-sm);
+  border-radius: var(--fp-radius-md);
   color: var(--fp-text);
   font-size: 13px;
   transition: background-color var(--fp-transition-fast), color var(--fp-transition-fast);
+}
+
+.admin-shell.is-collapsed .shell-nav__item {
+  justify-content: center;
+  padding: 6px 0;
 }
 
 .shell-nav__item:hover {
@@ -347,13 +375,30 @@ async function handleLogout(): Promise<void> {
   font-weight: 600;
 }
 
+.shell-nav__item.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--fp-primary);
+}
+
 .shell-nav__dot {
   width: 6px;
   height: 6px;
   border-radius: 999px;
   background: currentColor;
-  opacity: 0.6;
+  opacity: 0.55;
   flex-shrink: 0;
+  transition: transform var(--fp-transition-fast), opacity var(--fp-transition-fast);
+}
+
+.shell-nav__item.is-active .shell-nav__dot {
+  opacity: 1;
+  transform: scale(1.2);
 }
 
 .shell-nav__label {
@@ -365,23 +410,33 @@ async function handleLogout(): Promise<void> {
 }
 
 .shell-nav__phase {
-  font-size: 11px;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: var(--fp-elevated);
+  font-size: 10px;
+  line-height: 1.4;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--fp-surface-subtle);
   border: 1px solid var(--fp-border);
   color: var(--fp-muted);
   flex-shrink: 0;
 }
 
 .shell-sidebar__foot {
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-top: 1px solid var(--fp-border);
 }
 
 .shell-legacy-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-size: 12px;
+  color: var(--fp-muted);
+  padding: 4px 6px;
+  border-radius: var(--fp-radius-sm);
+}
+
+.shell-legacy-link:hover {
+  background: var(--fp-hover);
   color: var(--fp-link);
 }
 
@@ -396,8 +451,10 @@ async function handleLogout(): Promise<void> {
   top: 0;
   z-index: 30;
   min-height: var(--fp-topbar-h);
-  padding: 8px 20px;
+  padding: 8px 24px;
   background: var(--fp-nav);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--fp-border);
   box-shadow: var(--fp-nav-shadow);
   display: flex;
@@ -412,7 +469,7 @@ async function handleLogout(): Promise<void> {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 10px;
+  gap: 8px;
 }
 
 .shell-mobile-btn {
@@ -422,12 +479,13 @@ async function handleLogout(): Promise<void> {
 .shell-breadcrumb {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   font-size: 13px;
 }
 
 .shell-breadcrumb__sep {
   color: var(--fp-muted);
+  opacity: 0.65;
 }
 
 .shell-breadcrumb__current {
@@ -439,27 +497,40 @@ async function handleLogout(): Promise<void> {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 2px 8px;
-  border-radius: var(--fp-radius-sm);
+  padding: 3px 10px 3px 5px;
+  border-radius: 999px;
   background: var(--fp-elevated);
   border: 1px solid var(--fp-border);
 }
 
 .shell-user__avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
   object-fit: cover;
+  flex-shrink: 0;
+}
+
+.shell-user__avatar--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--fp-primary-soft);
+  color: var(--fp-primary);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .shell-user__meta {
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
+  gap: 6px;
   line-height: 1.2;
 }
 
 .shell-user__meta strong {
   font-size: 12px;
+  font-weight: 600;
   color: var(--fp-title);
 }
 
@@ -469,7 +540,9 @@ async function handleLogout(): Promise<void> {
 }
 
 .shell-notice {
-  margin: 14px 20px 0;
+  width: 100%;
+  max-width: calc(var(--fp-content-max-w) + 48px);
+  margin: 14px auto 0;
   padding: 12px 16px;
   border-radius: var(--fp-radius-md);
   background: var(--fp-warning-soft);
@@ -490,8 +563,17 @@ async function handleLogout(): Promise<void> {
 
 .shell-content {
   flex: 1;
-  padding: 20px;
+  padding: 22px 24px 32px;
   min-width: 0;
+}
+
+.shell-content__inner {
+  width: 100%;
+  max-width: var(--fp-content-max-w);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .shell-backdrop {
@@ -510,13 +592,14 @@ async function handleLogout(): Promise<void> {
     inset: 0;
     z-index: 45;
     background: var(--fp-mask-bg);
+    backdrop-filter: blur(2px);
   }
 
   .shell-sidebar {
     position: fixed;
     left: 0;
     top: 0;
-    width: 260px;
+    width: 268px;
     transform: translateX(-100%);
     transition: transform var(--fp-transition-fast);
     z-index: 50;
@@ -543,11 +626,12 @@ async function handleLogout(): Promise<void> {
   }
 
   .shell-content {
-    padding: 14px;
+    padding: 14px 14px 24px;
   }
 
   .shell-notice {
     margin: 12px 14px 0;
+    width: auto;
   }
 }
 </style>

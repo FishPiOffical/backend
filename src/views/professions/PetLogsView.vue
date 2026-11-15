@@ -98,28 +98,28 @@ onMounted(() => load(1))
 </script>
 
 <template>
-  <section class="panel">
-    <header class="panel-header">
+  <div class="admin-page">
+    <header class="admin-page__header">
       <div>
-        <div style="display: flex; align-items: center; gap: 10px">
-          <h2 class="panel-title">宠物活动与风控日志</h2>
+        <div class="admin-panel__title-row">
+          <h1 class="admin-page__title">宠物活动与风控日志</h1>
           <StatusBadge label="严格只读" tone="info" />
         </div>
-        <p class="panel-desc">仅管理员可检索宠物活动与风控流水，不提供改币、重置宠物或清零等写入入口。</p>
+        <p class="admin-page__subtitle">仅管理员可检索宠物活动与风控流水，不提供改币、重置宠物或清零等写入入口。</p>
       </div>
-      <div style="display: flex; gap: 8px">
+      <div class="admin-tabs" role="tablist" aria-label="日志类型切换">
         <button
           type="button"
-          class="btn"
-          :class="{ 'btn-primary': tab === 'activity' }"
+          class="admin-tab"
+          :class="{ 'is-active': tab === 'activity' }"
           @click="switchTab('activity')"
         >
           活动日志
         </button>
         <button
           type="button"
-          class="btn"
-          :class="{ 'btn-primary': tab === 'risk' }"
+          class="admin-tab"
+          :class="{ 'is-active': tab === 'risk' }"
           @click="switchTab('risk')"
         >
           风控日志
@@ -127,47 +127,49 @@ onMounted(() => load(1))
       </div>
     </header>
 
-    <div class="filter-bar">
-      <input v-model="userFilter" class="input" placeholder="用户名 / 用户 ID" @keyup.enter="load(1)" />
-      <input v-model="fromDate" class="input" type="date" aria-label="开始日期" />
-      <input v-model="toDate" class="input" type="date" aria-label="结束日期" />
-      <select v-model="operationFilter" class="select">
-        <option value="">全部操作类型</option>
-        <option v-for="[k, label] in operationOptions" :key="k" :value="k">{{ label }}</option>
-      </select>
-      <button type="button" class="btn btn-primary" :disabled="loading" @click="load(1)">查询</button>
-      <button v-if="hasActiveFilter" type="button" class="btn" @click="resetFilters">重置</button>
-    </div>
-
-    <PageStateView
-      :state="pageState"
-      :error-message="loadError"
-      empty-title="暂无匹配日志"
-      empty-desc="当前筛选条件下没有宠物活动或风控记录。"
-      @retry="load(page)"
-    >
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th v-for="col in columns" :key="col">{{ col }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(row, idx) in rows" :key="idx">
-              <td v-for="col in columns" :key="col">{{ row[col] ?? '-' }}</td>
-            </tr>
-          </tbody>
-        </table>
+    <section class="admin-panel admin-stack">
+      <div class="admin-filter-bar" style="margin: 0">
+        <input v-model="userFilter" class="admin-input" placeholder="用户名 / 用户 ID" @keyup.enter="load(1)" />
+        <input v-model="fromDate" class="admin-input" type="date" aria-label="开始日期" />
+        <input v-model="toDate" class="admin-input" type="date" aria-label="结束日期" />
+        <select v-model="operationFilter" class="admin-select">
+          <option value="">全部操作类型</option>
+          <option v-for="[k, label] in operationOptions" :key="k" :value="k">{{ label }}</option>
+        </select>
+        <button type="button" class="admin-btn admin-btn--primary" :disabled="loading" @click="load(1)">查询</button>
+        <button v-if="hasActiveFilter" type="button" class="admin-btn" @click="resetFilters">重置</button>
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px">
-        <span style="color: var(--text-muted); font-size: 13px">第 {{ page }} 页</span>
-        <div style="display: flex; gap: 8px">
-          <button type="button" class="btn" :disabled="loading || page <= 1" @click="load(page - 1)">上一页</button>
-          <button type="button" class="btn" :disabled="loading || !data?.hasNext" @click="load(page + 1)">下一页</button>
+      <PageStateView
+        :state="pageState"
+        :error-message="loadError"
+        empty-title="暂无匹配日志"
+        empty-desc="当前筛选条件下没有宠物活动或风控记录。"
+        @retry="load(page)"
+      >
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th v-for="col in columns" :key="col">{{ col }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, idx) in rows" :key="idx">
+                <td v-for="col in columns" :key="col">{{ row[col] ?? '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-    </PageStateView>
-  </section>
+
+        <div class="admin-row" style="justify-content: space-between">
+          <span class="admin-muted admin-mono" style="font-size: 12px">第 {{ page }} 页</span>
+          <div class="admin-row">
+            <button type="button" class="admin-btn admin-btn--sm" :disabled="loading || page <= 1" @click="load(page - 1)">上一页</button>
+            <button type="button" class="admin-btn admin-btn--sm" :disabled="loading || !data?.hasNext" @click="load(page + 1)">下一页</button>
+          </div>
+        </div>
+      </PageStateView>
+    </section>
+  </div>
 </template>

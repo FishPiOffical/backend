@@ -53,52 +53,57 @@ const phraseMatched = computed(() => {
 
 <template>
   <Teleport to="body">
-    <div v-if="open" class="dialog-mask" role="presentation" @click.self="!pending && emit('cancel')">
-      <section class="dialog-card" role="alertdialog" aria-modal="true" :aria-label="title">
-        <header class="dialog-card__header">
-          <h3 class="dialog-card__title" :class="{ 'is-danger': danger }">{{ title }}</h3>
-        </header>
+    <Transition name="dialog-fade">
+      <div v-if="open" class="dialog-mask" role="presentation" @click.self="!pending && emit('cancel')">
+        <section class="dialog-card" role="alertdialog" aria-modal="true" :aria-label="title">
+          <header class="dialog-card__header">
+            <span class="dialog-card__badge" :class="danger ? 'is-danger' : 'is-info'" aria-hidden="true">
+              {{ danger ? '!' : '✓' }}
+            </span>
+            <h3 class="dialog-card__title" :class="{ 'is-danger': danger }">{{ title }}</h3>
+          </header>
 
-        <div class="dialog-card__body">
-          <p class="dialog-card__desc">{{ description }}</p>
+          <div class="dialog-card__body">
+            <p class="dialog-card__desc">{{ description }}</p>
 
-          <dl v-if="summaryItems.length" class="dialog-summary">
-            <div v-for="item in summaryItems" :key="item.label" class="dialog-summary__row">
-              <dt>{{ item.label }}</dt>
-              <dd>{{ item.value }}</dd>
+            <dl v-if="summaryItems.length" class="dialog-summary">
+              <div v-for="item in summaryItems" :key="item.label" class="dialog-summary__row">
+                <dt>{{ item.label }}</dt>
+                <dd>{{ item.value }}</dd>
+              </div>
+            </dl>
+
+            <div v-if="requireConfirmPhrase" class="dialog-phrase">
+              <label class="dialog-phrase__label">
+                请输入 <code class="admin-mono">{{ requireConfirmPhrase }}</code> 以确认此高风险操作：
+              </label>
+              <input
+                v-model="phraseInput"
+                type="text"
+                class="admin-input"
+                :disabled="pending"
+                :placeholder="requireConfirmPhrase"
+              />
             </div>
-          </dl>
-
-          <div v-if="requireConfirmPhrase" class="dialog-phrase">
-            <label class="dialog-phrase__label">
-              请输入 <code class="admin-mono">{{ requireConfirmPhrase }}</code> 以确认此高风险操作：
-            </label>
-            <input
-              v-model="phraseInput"
-              type="text"
-              class="admin-input"
-              :disabled="pending"
-              :placeholder="requireConfirmPhrase"
-            />
           </div>
-        </div>
 
-        <footer class="dialog-card__footer">
-          <button type="button" class="admin-btn" :disabled="pending" @click="emit('cancel')">
-            {{ cancelText }}
-          </button>
-          <button
-            type="button"
-            class="admin-btn"
-            :class="danger ? 'admin-btn--danger' : 'admin-btn--primary'"
-            :disabled="pending || !phraseMatched"
-            @click="emit('confirm')"
-          >
-            {{ pending ? '提交确认中...' : confirmText }}
-          </button>
-        </footer>
-      </section>
-    </div>
+          <footer class="dialog-card__footer">
+            <button type="button" class="admin-btn" :disabled="pending" @click="emit('cancel')">
+              {{ cancelText }}
+            </button>
+            <button
+              type="button"
+              class="admin-btn"
+              :class="danger ? 'admin-btn--danger' : 'admin-btn--primary'"
+              :disabled="pending || !phraseMatched"
+              @click="emit('confirm')"
+            >
+              {{ pending ? '提交确认中...' : confirmText }}
+            </button>
+          </footer>
+        </section>
+      </div>
+    </Transition>
   </Teleport>
 </template>
 
@@ -112,6 +117,8 @@ const phraseMatched = computed(() => {
   justify-content: center;
   padding: 16px;
   background: var(--fp-mask-bg);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .dialog-card {
@@ -125,12 +132,37 @@ const phraseMatched = computed(() => {
 }
 
 .dialog-card__header {
-  padding: 16px 20px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 22px 12px;
+}
+
+.dialog-card__badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.dialog-card__badge.is-danger {
+  background: var(--fp-danger-soft);
+  color: var(--fp-danger-ink);
+}
+
+.dialog-card__badge.is-info {
+  background: var(--fp-primary-soft);
+  color: var(--fp-primary);
 }
 
 .dialog-card__title {
   margin: 0;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--fp-title);
 }
@@ -140,7 +172,7 @@ const phraseMatched = computed(() => {
 }
 
 .dialog-card__body {
-  padding: 0 20px 18px;
+  padding: 0 22px 18px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -198,8 +230,28 @@ const phraseMatched = computed(() => {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 13px 22px;
   border-top: 1px solid var(--fp-border);
   background: var(--fp-elevated);
+}
+
+.dialog-fade-enter-active,
+.dialog-fade-leave-active {
+  transition: opacity 160ms ease;
+}
+
+.dialog-fade-enter-active .dialog-card,
+.dialog-fade-leave-active .dialog-card {
+  transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dialog-fade-enter-from,
+.dialog-fade-leave-to {
+  opacity: 0;
+}
+
+.dialog-fade-enter-from .dialog-card,
+.dialog-fade-leave-to .dialog-card {
+  transform: scale(0.97) translateY(6px);
 }
 </style>

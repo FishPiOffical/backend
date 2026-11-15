@@ -22,8 +22,8 @@ withDefaults(
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 9px;
-  border-radius: var(--fp-radius-sm);
+  padding: 2px 10px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 500;
   line-height: 1.45;
@@ -37,26 +37,30 @@ withDefaults(
   height: 6px;
   border-radius: 999px;
   background: currentColor;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 .status-badge[data-tone='success'] {
   background: var(--fp-primary-soft);
+  border-color: var(--fp-primary-border);
   color: var(--fp-primary);
 }
 
 .status-badge[data-tone='warning'] {
   background: var(--fp-warning-soft);
+  border-color: rgba(217, 119, 6, 0.25);
   color: var(--fp-warning);
 }
 
 .status-badge[data-tone='danger'] {
   background: var(--fp-danger-soft);
+  border-color: rgba(220, 38, 38, 0.24);
   color: var(--fp-danger-ink);
 }
 
 .status-badge[data-tone='info'] {
-  background: rgba(40, 101, 188, 0.12);
+  background: var(--fp-info-soft);
+  border-color: rgba(37, 99, 235, 0.22);
   color: var(--fp-link);
 }
 

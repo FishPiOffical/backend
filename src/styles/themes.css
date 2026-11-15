@@ -1,90 +1,101 @@
 /*
  * Rhythm 管理后台深浅色主题变量。
- * 颜色严格对齐《Rhythm 管理后台开发规划》与 website_v3 经典主题：
- * 默认使用经典浅色（classic-light），支持切换经典深色（classic-dark）。
+ * 保留经典绿（classic-light / classic-dark）品牌基调，强化层次感、对比度与表面层级。
  */
 
 :root,
 html[data-theme='classic-light'] {
   color-scheme: light;
 
-  --fp-page-bg: #f5f6f8;
+  --fp-page-bg: #f3f5f7;
   --fp-bg: #ffffff;
-  --fp-nav: #ffffff;
+  --fp-nav: rgba(255, 255, 255, 0.92);
+  --fp-sidebar-bg: #ffffff;
   --fp-card: #ffffff;
-  --fp-elevated: #f9fafb;
+  --fp-elevated: #f8fafc;
+  --fp-surface-subtle: #f1f4f8;
+  --fp-table-head: #f6f8fa;
 
   --fp-text: #2c2e33;
-  --fp-title: #1f2329;
-  --fp-head: #4b525c;
-  --fp-muted: #676e79;
+  --fp-title: #16191f;
+  --fp-head: #4b5563;
+  --fp-muted: #6b7280;
 
-  --fp-primary: #60b044;
-  --fp-primary-hover: #539e38;
+  --fp-primary: #4e9a34;
+  --fp-primary-hover: #42852b;
   --fp-primary-fill: #36752e;
   --fp-primary-fill-hover: #2c6125;
-  --fp-primary-soft: rgba(96, 176, 68, 0.14);
+  --fp-primary-soft: rgba(96, 176, 68, 0.12);
+  --fp-primary-border: rgba(78, 154, 52, 0.28);
 
-  --fp-link: #2865bc;
-  --fp-link-hover: #1e5199;
-  --fp-accent: #e59230;
-  --fp-warning: #e59230;
-  --fp-warning-soft: rgba(229, 146, 48, 0.14);
+  --fp-link: #2563eb;
+  --fp-link-hover: #1d4ed8;
+  --fp-info-soft: rgba(37, 99, 235, 0.1);
+  --fp-accent: #d97706;
+  --fp-warning: #d97706;
+  --fp-warning-soft: rgba(217, 119, 6, 0.12);
   --fp-danger: #dc2626;
   --fp-danger-hover: #b91c1c;
-  --fp-danger-soft: rgba(220, 38, 38, 0.12);
+  --fp-danger-soft: rgba(220, 38, 38, 0.1);
   --fp-danger-ink: #b91c1c;
 
-  --fp-border: #e6e8ec;
-  --fp-border-strong: #d0d5dd;
-  --fp-hover: rgba(31, 35, 41, 0.04);
+  --fp-border: #e5e7eb;
+  --fp-border-strong: #d1d5db;
+  --fp-hover: rgba(17, 24, 39, 0.04);
 
   --fp-control-bg: #ffffff;
-  --fp-nav-shadow: 0 1px 0 #e6e8ec;
-  --fp-card-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
-  --fp-dialog-shadow: 0 18px 48px rgba(15, 23, 42, 0.16);
-  --fp-mask-bg: rgba(15, 23, 42, 0.45);
+  --fp-nav-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --fp-card-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03);
+  --fp-card-hover-shadow: 0 6px 18px rgba(15, 23, 42, 0.07);
+  --fp-dialog-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
+  --fp-mask-bg: rgba(15, 23, 42, 0.42);
   --fp-focus-ring: 0 0 0 3px rgba(96, 176, 68, 0.22);
 }
 
 html[data-theme='classic-dark'] {
   color-scheme: dark;
 
-  --fp-page-bg: #242626;
-  --fp-bg: #242626;
-  --fp-nav: #242525;
-  --fp-card: #282a2a;
-  --fp-elevated: #2f3232;
+  --fp-page-bg: #1b1d1e;
+  --fp-bg: #1b1d1e;
+  --fp-nav: rgba(30, 32, 33, 0.9);
+  --fp-sidebar-bg: #1e2021;
+  --fp-card: #242627;
+  --fp-elevated: #2b2e30;
+  --fp-surface-subtle: #2f3335;
+  --fp-table-head: #292c2d;
 
-  --fp-text: #cbc5ba;
-  --fp-title: #ddd7cc;
-  --fp-head: #aca396;
-  --fp-muted: #9e9689;
+  --fp-text: #d1cbc0;
+  --fp-title: #ebe6dc;
+  --fp-head: #b5aea2;
+  --fp-muted: #958e82;
 
-  --fp-primary: #69aa69;
-  --fp-primary-hover: #5b9a5b;
+  --fp-primary: #6cb46c;
+  --fp-primary-hover: #5ca25c;
   --fp-primary-fill: #36773b;
   --fp-primary-fill-hover: #2d6531;
-  --fp-primary-soft: rgba(105, 170, 105, 0.16);
+  --fp-primary-soft: rgba(108, 180, 108, 0.15);
+  --fp-primary-border: rgba(108, 180, 108, 0.3);
 
-  --fp-link: #5c9fdf;
-  --fp-link-hover: #7bb4ec;
-  --fp-accent: #e59230;
-  --fp-warning: #e59230;
-  --fp-warning-soft: rgba(229, 146, 48, 0.16);
-  --fp-danger: #d9534f;
-  --fp-danger-hover: #c6433f;
-  --fp-danger-soft: rgba(217, 83, 79, 0.16);
-  --fp-danger-ink: #ef887b;
+  --fp-link: #60a5fa;
+  --fp-link-hover: #93c5fd;
+  --fp-info-soft: rgba(96, 165, 250, 0.14);
+  --fp-accent: #f59e0b;
+  --fp-warning: #f59e0b;
+  --fp-warning-soft: rgba(245, 158, 11, 0.15);
+  --fp-danger: #e05252;
+  --fp-danger-hover: #c94141;
+  --fp-danger-soft: rgba(224, 82, 82, 0.16);
+  --fp-danger-ink: #f28b82;
 
   --fp-border: rgba(255, 255, 255, 0.08);
-  --fp-border-strong: rgba(255, 255, 255, 0.16);
+  --fp-border-strong: rgba(255, 255, 255, 0.15);
   --fp-hover: rgba(255, 255, 255, 0.05);
 
-  --fp-control-bg: #2f3232;
+  --fp-control-bg: #2a2d2e;
   --fp-nav-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
-  --fp-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
-  --fp-dialog-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
-  --fp-mask-bg: rgba(0, 0, 0, 0.58);
-  --fp-focus-ring: 0 0 0 3px rgba(105, 170, 105, 0.24);
+  --fp-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --fp-card-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+  --fp-dialog-shadow: 0 24px 56px rgba(0, 0, 0, 0.55);
+  --fp-mask-bg: rgba(0, 0, 0, 0.6);
+  --fp-focus-ring: 0 0 0 3px rgba(108, 180, 108, 0.24);
 }
