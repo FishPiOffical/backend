@@ -19,3 +19,11 @@ VITE_BASE_PATH=/manage/ VITE_API_BASE_URL=https://fishpi.cn npm run build
 构建和两项现有回归通过；线上登录、OAuth回跳、首页200，后台入口资源与本地构建一致；浏览器显示新OAuth按钮，无有效state直接访问回跳页明确提示失效。真实OAuth授权、两步验证及管理员数据尚未验证。
 
 回滚：将current原子切回 `/opt/fishpi/releases/20261115-94e8a70-admin-e7e54e2`，本次无需恢复Caddy。
+
+## 2026-11-15 资产恢复与审核交互更新
+
+业务版本 `2ef4c38`，部署至 `/opt/fishpi/releases/20261115-e72f5d1-admin-2ef4c38`。从当前联合发布复制后仅覆盖manage产物并原子切换，旧后台哈希资源保留；前台dist/server/server.js逐文件比较一致，无服务重启或Caddy修改。
+
+生产构建通过；资产恢复旧测试夹具漏导出新增函数，已改为引用真实ApiError/错误分类函数并补验409 operation_outcome_unknown的鱼游导入恢复，测试修订提交066793f。configuration与asset-recovery均通过。线上登录页/后台内部路由/前台首页200，后台入口JS/CSS与本地构建一致，浏览器登录页正常。未执行真实管理写操作，新增审核和配置交互未做登录后浏览器验收。
+
+回滚只需将current原子切回 `/opt/fishpi/releases/20261115-e72f5d1-admin-0689d32`。
