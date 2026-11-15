@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ApiError } from '@/api/http'
+import { startWebsiteOAuth } from '@/api/websiteOAuth'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 
@@ -20,16 +21,49 @@ const nameOrEmail = ref('')
 const password = ref('')
 const mfaCode = ref('')
 const mfaRequired = ref(false)
+const mfaInput = ref<HTMLInputElement | null>(null)
 const submitting = ref(false)
 const errorMessage = ref('')
+const oauthStarting = ref(false)
 
 const blockedNonAdmin = computed(
   () => auth.isLoggedIn && auth.capabilities !== null && !auth.capabilities.canEnterConsole,
 )
 
+watch([nameOrEmail, password], () => {
+  if (!mfaRequired.value) return
+  mfaRequired.value = false
+  mfaCode.value = ''
+  errorMessage.value = ''
+})
+
+async function focusMfa() {
+  await nextTick()
+  mfaInput.value?.focus()
+}
+
+async function handleOAuthLogin(): Promise<void> {
+  if (submitting.value || oauthStarting.value) return
+  oauthStarting.value = true
+  errorMessage.value = ''
+  try {
+    const target = typeof route.query.redirect === 'string' ? route.query.redirect : '/workbench'
+    await startWebsiteOAuth(target)
+  } catch {
+    errorMessage.value = '无法打开摸鱼派授权，请刷新后台登录页后重试。'
+    oauthStarting.value = false
+  }
+}
+
 async function handleSubmit(): Promise<void> {
+  if (submitting.value || oauthStarting.value) return
   if (!nameOrEmail.value.trim() || !password.value) {
     errorMessage.value = '请输入用户名/邮箱与密码'
+    return
+  }
+  if (mfaRequired.value && !/^\d{6,8}$/.test(mfaCode.value.trim())) {
+    errorMessage.value = '请输入 6 至 8 位动态验证码。'
+    await focusMfa()
     return
   }
 
@@ -51,14 +85,18 @@ async function handleSubmit(): Promise<void> {
       : '/workbench'
     await router.replace(target)
   } catch (err) {
-    if (err instanceof ApiError && err.errorCode === 'mfa_required') {
+    if (err instanceof ApiError && (err.errorCode === 'mfa_required' || err.errorCode === 'invalid_mfa')) {
       mfaRequired.value = true
-      errorMessage.value = '该账号已开启两步验证（MFA），请输入 6 位动态验证码后再次提交。'
+      mfaCode.value = ''
+      errorMessage.value = err.errorCode === 'mfa_required'
+        ? '该账号已开启两步验证，请输入身份验证器中的动态验证码。'
+        : '验证码错误或已过期，请输入最新的动态验证码。'
       return
     }
     errorMessage.value = err instanceof Error ? err.message : '登录失败，请稍后重试'
   } finally {
     submitting.value = false
+    if (mfaRequired.value && errorMessage.value) await focusMfa()
   }
 }
 
@@ -123,7 +161,7 @@ async function handleSwitchAccount(): Promise<void> {
               type="password"
               class="admin-input"
               autocomplete="current-password"
-              placeholder="输入登录密码（本地 MD5 后提交）"
+              placeholder="输入登录密码"
               :disabled="submitting"
             />
           </div>
@@ -132,21 +170,25 @@ async function handleSwitchAccount(): Promise<void> {
             <label for="login-mfa">两步验证码（MFA）</label>
             <input
               id="login-mfa"
+              ref="mfaInput"
               v-model="mfaCode"
               type="text"
               inputmode="numeric"
-              maxlength="12"
+              maxlength="8"
               class="admin-input admin-mono"
               autocomplete="one-time-code"
-              placeholder="请输入 6 位动态验证码"
+              placeholder="输入动态验证码"
               :disabled="submitting"
             />
           </div>
 
           <p v-if="errorMessage" class="login-error" role="alert">{{ errorMessage }}</p>
 
-          <button type="submit" class="admin-btn admin-btn--primary login-submit" :disabled="submitting">
-            {{ submitting ? '正在核验身份...' : '登录管理后台' }}
+          <button type="submit" class="admin-btn admin-btn--primary login-submit" :disabled="submitting || oauthStarting">
+            {{ submitting ? '正在核验身份…' : mfaRequired ? '验证并登录' : '登录管理后台' }}
+          </button>
+          <button type="button" class="admin-btn" :disabled="submitting || oauthStarting" @click="handleOAuthLogin">
+            {{ oauthStarting ? '正在前往摸鱼派…' : '使用摸鱼派 OAuth 登录' }}
           </button>
         </form>
       </section>

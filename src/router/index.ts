@@ -27,6 +27,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '登录', requiresAuth: false },
   },
   {
+    path: '/oauth/callback',
+    name: 'oauth-login-callback',
+    component: () => import('@/views/OAuthCallbackView.vue'),
+    meta: { title: '摸鱼派授权登录', requiresAuth: false },
+  },
+  {
     path: '/',
     component: () => import('@/layouts/AdminLayout.vue'),
     meta: { requiresAuth: true },
@@ -430,6 +436,8 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
+  if (to.name === 'oauth-login-callback') return true
+
   const auth = useAuthStore()
   if (!auth.initialized) {
     await auth.restoreSession()

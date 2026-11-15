@@ -137,6 +137,8 @@ async function parseErrorPayload(res: Response): Promise<{ message: string; code
         }
         if (typeof parsed.error === 'string' && parsed.error.trim()) {
           code = parsed.error.trim()
+        } else if (typeof parsed.code === 'string' && parsed.code.trim()) {
+          code = parsed.code.trim()
         }
         if (typeof parsed.requestId === 'string' && parsed.requestId.trim()) {
           requestId = parsed.requestId.trim()

@@ -8,6 +8,9 @@
 
 - 管理前端仅使用第一方 `website_v3` Bearer 认证体系（`POST /api/v3/auth/login`、`POST /api/v3/auth/refresh`、`POST /api/v3/auth/logout`、`GET /api/v3/auth/session`、`GET /api/v3/me`），`accessToken` 仅保存在内存状态中，不写入 `localStorage` / `sessionStorage`。
 - 第三方 OAuth 客户端令牌（非 `website_v3`）及普通未授权账号不得用于管理写入或管理能力访问。
+- 登录失败响应的字符串 `code` 用于区分 `mfa_required` 与 `invalid_mfa`。后台提示输入 6 至 8 位动态验证码，账号或密码变化时清除旧验证码。
+- 「使用摸鱼派 OAuth 登录」在当前标签页打开授权页。批准后自动返回 `/manage/oauth/callback`，校验 `state`、凭 PKCE 换码并读取当前账号的后台能力。回调校验参数仅暂存当前标签页，消费后立即清理；刷新凭据通过 HttpOnly Cookie 交付。
+- 本地 OAuth 默认使用当前回环主机的 8080 端口作为授权方，可用 `VITE_FISHPI_OAUTH_ORIGIN` 指向实际摸鱼派授权地址。前端默认端口为 5173。若使用例如 5186 的预览端口，后端 IDEA VM 参数需匹配实际页面来源，如 `-Drhythm.dev.websiteOrigin=http://127.0.0.1:5186`。
 - 管理员角色及特殊操作员身份始终在每次后端请求时重新查库校验，前端隐藏菜单或按钮仅作为交互提示，不承担安全边界。
 
 ### 1.2 能力聚合接口：`GET /api/v3/admin/capabilities`

@@ -155,11 +155,11 @@ export const useAuthStore = defineStore('admin-auth', () => {
     return run
   }
 
-  async function login(nameOrEmail: string, password: string, mfaCode?: string): Promise<AdminCapabilities | null> {
+  async function completeLogin(acceptCredential: () => Promise<unknown>): Promise<AdminCapabilities | null> {
     loading.value = true
     try {
       clearPrivateSessionState()
-      await loginWithPassword(nameOrEmail, password, mfaCode)
+      await acceptCredential()
       const me = await fetchCurrentUser()
       account.value = me
       const caps = await refreshCapabilities()
@@ -168,6 +168,10 @@ export const useAuthStore = defineStore('admin-auth', () => {
     } finally {
       loading.value = false
     }
+  }
+
+  function login(nameOrEmail: string, password: string, mfaCode?: string): Promise<AdminCapabilities | null> {
+    return completeLogin(() => loginWithPassword(nameOrEmail, password, mfaCode))
   }
 
   async function logout(): Promise<void> {
@@ -203,6 +207,7 @@ export const useAuthStore = defineStore('admin-auth', () => {
     restoreSession,
     refreshCapabilities,
     login,
+    completeLogin,
     logout,
     hasMenu,
     hasPermission,

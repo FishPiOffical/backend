@@ -11,6 +11,7 @@ declare module '*.vue' {
 interface ImportMetaEnv {
   readonly VITE_API_BASE_URL?: string
   readonly VITE_LEGACY_ADMIN_BASE?: string
+  readonly VITE_FISHPI_OAUTH_ORIGIN?: string
   readonly VITE_ENV_LABEL?: string
 }
 
