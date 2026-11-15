@@ -242,24 +242,25 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="panel-card">
-    <div class="panel-head">
+  <div class="admin-page">
+    <div class="admin-page__header">
       <div>
         <h2>勋章定义、预览与授予撤销</h2>
-        <p class="muted">支持安全预览、持有者检索、单项授/撤及批量发放逐项回执（expireTime = 0 为永久）。</p>
+        <p class="admin-muted">支持安全预览、持有者检索、单项授/撤及批量发放逐项回执（expireTime = 0 为永久）。</p>
       </div>
-      <div class="filter-row">
-        <input v-model="keyword" class="input" placeholder="搜索勋章名称" @keyup.enter="loadMedals" />
-        <button class="btn btn-secondary" @click="loadMedals">检索</button>
-        <button v-if="canDefine" class="btn btn-secondary" :disabled="busy" @click="handleReorderSponsor">重排赞助勋章</button>
+      <div class="admin-filter-bar admin-search-bar">
+        <input aria-label="搜索勋章名称" v-model="keyword" class="admin-input" placeholder="搜索勋章名称" @keyup.enter="loadMedals" />
+        <button class="admin-btn admin-btn--secondary" @click="loadMedals">检索</button>
+        <button v-if="canDefine" class="admin-btn admin-btn--secondary" :disabled="busy" @click="handleReorderSponsor">重排赞助勋章</button>
       </div>
     </div>
+    <section class="admin-panel">
 
     <p v-if="toast" class="notice-banner">{{ toast }}</p>
 
     <div class="split-layout">
       <div>
-        <table class="data-table">
+        <div class="admin-table-wrap"><table class="admin-table">
           <thead>
             <tr>
               <th>名称</th>
@@ -271,32 +272,32 @@ onMounted(() => {
             <tr v-for="m in medals" :key="m.oId" :class="{ 'row-active': selectedMedal?.oId === m.oId }">
               <td>
                 <strong>{{ m.name }}</strong>
-                <div class="muted">{{ m.description || m.oId }}</div>
+                <div class="admin-muted">{{ m.description || m.oId }}</div>
               </td>
               <td>{{ m.type }}</td>
               <td>
                 <div class="btn-row">
-                  <button class="btn btn-sm" @click="selectMedal(m)">选择</button>
-                  <button v-if="canDefine" class="btn btn-sm btn-danger" :disabled="busy" @click="handleDeleteMedal(m)">删除</button>
+                  <button class="admin-btn admin-btn--sm" @click="selectMedal(m)">选择</button>
+                  <button v-if="canDefine" class="admin-btn admin-btn--sm admin-btn--danger" :disabled="busy" @click="handleDeleteMedal(m)">删除</button>
                 </div>
               </td>
             </tr>
           </tbody>
-        </table>
+        </table></div>
       </div>
 
       <div class="right-stack">
         <div v-if="canDefine" class="sub-card">
           <div class="pane-head">
             <h3>{{ medalForm.oId ? '编辑勋章定义' : '新增勋章定义' }}</h3>
-            <button class="btn btn-sm" type="button" @click="resetMedalForm">新建</button>
+            <button class="admin-btn admin-btn--sm" type="button" @click="resetMedalForm">新建</button>
           </div>
           <div class="form-grid">
-            <input v-model="medalForm.name" class="input" placeholder="勋章名称" />
-            <input v-model="medalForm.type" class="input" placeholder="类型 (如 normal / sponsor)" />
-            <input v-model="medalForm.description" class="input" placeholder="描述（支持 {var1}）" />
-            <textarea v-model="medalForm.attr" class="input" rows="2" placeholder="样式属性 JSON" />
-            <button class="btn btn-primary" :disabled="busy" @click="saveMedalDef">保存勋章定义</button>
+            <label class="admin-field"><input aria-label="勋章名称" v-model="medalForm.name" class="admin-input" placeholder="勋章名称" /></label>
+            <label class="admin-field"><input aria-label="类型 (如 normal / sponsor)" v-model="medalForm.type" class="admin-input" placeholder="类型 (如 normal / sponsor)" /></label>
+            <label class="admin-field"><input aria-label="描述（支持 {var1}）" v-model="medalForm.description" class="admin-input" placeholder="描述（支持 {var1}）" /></label>
+            <label class="admin-field"><textarea aria-label="样式属性 JSON" v-model="medalForm.attr" class="admin-textarea" rows="2" placeholder="样式属性 JSON" /></label>
+            <button class="admin-btn admin-btn--primary" :disabled="busy" @click="saveMedalDef">保存勋章定义</button>
           </div>
         </div>
 
@@ -305,27 +306,27 @@ onMounted(() => {
           <div class="safe-preview">
             <span class="badge">{{ selectedMedal.type }}</span>
             <strong>{{ selectedMedal.name }}</strong>
-            <span class="muted">{{ selectedMedal.description }}</span>
+            <span class="admin-muted">{{ selectedMedal.description }}</span>
           </div>
 
           <div v-if="canGrant || canRevoke" class="form-grid" style="margin-top: 0.75rem;">
-            <input v-model="singleTarget" class="input" placeholder="目标用户名或 ID" />
-            <input v-model.number="singleExpireTime" class="input" type="number" min="0" placeholder="到期时间戳(0=永久)" />
-            <input v-model="singleData" class="input" placeholder="附带数据（可选）" />
+            <label class="admin-field"><input aria-label="目标用户名或 ID" v-model="singleTarget" class="admin-input" placeholder="目标用户名或 ID" /></label>
+            <label class="admin-field"><input aria-label="到期时间戳(0=永久)" v-model.number="singleExpireTime" class="admin-input" type="number" min="0" placeholder="到期时间戳(0=永久)" /></label>
+            <label class="admin-field"><input aria-label="附带数据（可选）" v-model="singleData" class="admin-input" placeholder="附带数据（可选）" /></label>
             <div class="btn-row">
-              <button v-if="canGrant" class="btn btn-primary" :disabled="busy" @click="handleSingleGrant">单项授予</button>
-              <button v-if="canRevoke" class="btn btn-danger" :disabled="busy" @click="handleRevoke(singleTarget)">单项回收</button>
+              <button v-if="canGrant" class="admin-btn admin-btn--primary" :disabled="busy" @click="handleSingleGrant">单项授予</button>
+              <button v-if="canRevoke" class="admin-btn admin-btn--danger" :disabled="busy" @click="handleRevoke(singleTarget)">单项回收</button>
             </div>
           </div>
 
           <div v-if="canGrant" class="form-grid" style="margin-top: 1rem;">
             <h4>批量授予（每行或逗号分隔用户名/ID）</h4>
-            <textarea v-model="batchTargetsText" class="input" rows="3" placeholder="user1, user2" />
+            <label class="admin-field"><textarea aria-label="user1, user2" v-model="batchTargetsText" class="admin-textarea" rows="3" placeholder="user1, user2" /></label>
             <div class="btn-row">
-              <input v-model.number="batchExpireTime" class="input num-input" type="number" min="0" placeholder="0=永久" />
-              <input v-model="batchData" class="input" placeholder="变量数据（可选）" />
-              <button class="btn btn-secondary" type="button" @click="handleHoldCheck">持有预检</button>
-              <button class="btn btn-primary" type="button" :disabled="busy" @click="handleBatchGrant">执行批量授予</button>
+              <label class="admin-field"><input aria-label="0=永久" v-model.number="batchExpireTime" class="admin-input num-input" type="number" min="0" placeholder="0=永久" /></label>
+              <label class="admin-field"><input aria-label="变量数据（可选）" v-model="batchData" class="admin-input" placeholder="变量数据（可选）" /></label>
+              <button class="admin-btn admin-btn--secondary" type="button" @click="handleHoldCheck">持有预检</button>
+              <button class="admin-btn admin-btn--primary" type="button" :disabled="busy" @click="handleBatchGrant">执行批量授予</button>
             </div>
 
             <ul v-if="holdCheckResults.length" class="plain-list">
@@ -334,7 +335,7 @@ onMounted(() => {
               </li>
             </ul>
 
-            <table v-if="batchResults.length" class="data-table">
+            <div class="admin-table-wrap"><table v-if="batchResults.length" class="admin-table">
               <thead>
                 <tr><th>目标</th><th>结果</th><th>说明</th></tr>
               </thead>
@@ -345,14 +346,14 @@ onMounted(() => {
                   <td>{{ r.ok ? '已授予' : r.error }}</td>
                 </tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
 
           <h4 style="margin-top: 1rem;">当前持有者（{{ owners.length }}）</h4>
           <ul class="plain-list">
             <li v-for="o in owners" :key="o.oId">
               <span>{{ o.userName || o.userId }}（{{ o.permanent ? '永久' : o.expireTime }}）</span>
-              <button v-if="canRevoke" class="btn btn-sm btn-danger" :disabled="busy" @click="handleRevoke(o.userId)">回收</button>
+              <button v-if="canRevoke" class="admin-btn admin-btn--sm admin-btn--danger" :disabled="busy" @click="handleRevoke(o.userId)">回收</button>
             </li>
           </ul>
         </div>
@@ -360,29 +361,28 @@ onMounted(() => {
         <div class="sub-card">
           <h4>按用户检索已持有勋章</h4>
           <div class="btn-row">
-            <input v-model="lookupUser" class="input" placeholder="用户名或 ID" @keyup.enter="handleLookupUserMedals" />
-            <button class="btn btn-secondary" @click="handleLookupUserMedals">查询</button>
+            <input aria-label="用户名或 ID" v-model="lookupUser" class="admin-input" placeholder="用户名或 ID" @keyup.enter="handleLookupUserMedals" />
+            <button class="admin-btn admin-btn--secondary" @click="handleLookupUserMedals">查询</button>
           </div>
           <pre v-if="lookupMedals.length" class="code-box">{{ JSON.stringify(lookupMedals, null, 2) }}</pre>
         </div>
       </div>
     </div>
-  </section>
+      </section>
+  </div>
 </template>
 
 <style scoped>
-.panel-head, .pane-head { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
-.filter-row, .btn-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-.split-layout { display: grid; grid-template-columns: 1fr 1.3fr; gap: 1rem; align-items: start; }
+.pane-head { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.split-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 1rem; align-items: start; }
 .right-stack { display: flex; flex-direction: column; gap: 1rem; }
-.sub-card { border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 0.9rem; }
+.sub-card { border: 1px solid var(--fp-border); border-radius: 8px; padding: 0.9rem; }
 .form-grid { display: flex; flex-direction: column; gap: 0.5rem; }
-.safe-preview { display: flex; gap: 0.5rem; align-items: center; padding: 0.5rem; background: #f8fafc; border-radius: 6px; }
+.safe-preview { display: flex; gap: 0.5rem; align-items: center; padding: 0.5rem; background: var(--fp-elevated); border-radius: 6px; }
 .plain-list { list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-direction: column; gap: 0.35rem; }
 .plain-list li { display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; }
 .num-input { width: 110px; }
-.code-box { max-height: 180px; overflow: auto; background: #f8fafc; padding: 0.5rem; border-radius: 6px; font-size: 0.75rem; }
-.notice-banner { padding: 0.5rem 0.75rem; border-radius: 6px; background: #eff6ff; color: #1d4ed8; margin-bottom: 0.75rem; }
+.code-box { max-height: 180px; overflow: auto; background: var(--fp-elevated); padding: 0.5rem; border-radius: 6px; font-size: 0.75rem; }
 .row-active { background: rgba(59, 130, 246, 0.08); }
 @media (max-width: 960px) { .split-layout { grid-template-columns: 1fr; } }
 </style>

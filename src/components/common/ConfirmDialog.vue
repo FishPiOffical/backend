@@ -79,6 +79,7 @@ const phraseMatched = computed(() => {
               </label>
               <input
                 v-model="phraseInput"
+                aria-label="高风险操作确认文字"
                 type="text"
                 class="admin-input"
                 :disabled="pending"

@@ -1,4 +1,4 @@
-import { requestData } from './http'
+import { assetRequestData as requestData } from '@/stores/assetRecovery'
 
 /**
  * Rhythm V3 管理后台三期运营接口定义与客户端调用封装。
@@ -120,12 +120,11 @@ export async function updateInvitecode(invitecodeId: string, payload: { status: 
 export interface VipLevelItem {
   oId: string
   lvCode: string
-  name: string
-  description?: string
+  lvName: string
   price: number
-  durationDays: number
-  sortOrder?: number
-  enabled?: number | boolean
+  durationType: string
+  durationValue: number
+  benefits: string | Record<string, unknown>
 }
 
 export interface UserVipItem {

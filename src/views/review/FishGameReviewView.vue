@@ -99,35 +99,36 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="panel-card">
-    <div class="panel-head">
+  <div class="admin-page">
+    <div class="admin-page__header">
       <div>
         <h2>鱼游投稿及修改审核</h2>
-        <p class="muted">集中审核新投稿与已上线鱼游的待审资料变更，支持现网与待审字段对比。</p>
+        <p class="admin-muted">集中审核新投稿与已上线鱼游的待审资料变更，支持现网与待审字段对比。</p>
       </div>
-      <div class="filter-row">
-        <select v-model="statusFilter" class="input" @change="load(1)">
+      <div class="admin-filter-bar admin-search-bar">
+        <select aria-label="状态筛选" v-model="statusFilter" class="admin-select" @change="load(1)">
           <option value="0">待审核</option>
           <option value="1">已通过</option>
           <option value="2">已拒绝</option>
           <option value="3">已停用</option>
           <option value="all">全部状态</option>
         </select>
-        <label class="checkbox-inline">
+        <label class="checkbox-inline admin-choice">
           <input v-model="editPendingOnly" type="checkbox" @change="load(1)" />
           仅看有待审修改
         </label>
-        <input v-model="keyword" class="input" placeholder="名称或标签" @keyup.enter="load(1)" />
-        <button class="btn btn-secondary" type="button" @click="load(1)">查询</button>
+        <input aria-label="名称或标签" v-model="keyword" class="admin-input" placeholder="名称或标签" @keyup.enter="load(1)" />
+        <button class="admin-btn admin-btn--secondary" type="button" @click="load(1)">查询</button>
       </div>
     </div>
+    <section class="admin-panel">
 
     <p v-if="toast" class="notice-banner">{{ toast }}</p>
 
     <PageStateView :state="viewState" :error-message="errorMsg" empty-text="当前筛选条件下暂无鱼游记录" @retry="load(pagination.page)">
-      <div class="split-layout">
-        <div class="table-wrap">
-          <table class="data-table">
+      <div class="split-layout" :class="{ 'is-single-column': !selected }">
+        <div class="admin-table-wrap">
+          <table class="admin-table">
             <thead>
               <tr>
                 <th>名称</th>
@@ -144,25 +145,25 @@ onMounted(() => {
                 <td>{{ statusText(row.fishGameStatus) }}</td>
                 <td>
                   <span v-if="row.fishGameEditPending === 1" class="badge badge-warn">有待审修改</span>
-                  <span v-else class="muted">-</span>
+                  <span v-else class="admin-muted">-</span>
                 </td>
                 <td>
-                  <button class="btn btn-sm" type="button" @click="selected = row">查看 / 审核</button>
+                  <button class="admin-btn admin-btn--sm" type="button" @click="selected = row">查看 / 审核</button>
                 </td>
               </tr>
             </tbody>
           </table>
 
           <div class="pager-bar">
-            <button class="btn btn-sm" :disabled="pagination.page <= 1" @click="load(pagination.page - 1)">上一页</button>
+            <button class="admin-btn admin-btn--sm" :disabled="pagination.page <= 1" @click="load(pagination.page - 1)">上一页</button>
             <span>第 {{ pagination.page }} / {{ pagination.totalPages }} 页（共 {{ pagination.total }} 条）</span>
-            <button class="btn btn-sm" :disabled="pagination.page >= pagination.totalPages" @click="load(pagination.page + 1)">下一页</button>
+            <button class="admin-btn admin-btn--sm" :disabled="pagination.page >= pagination.totalPages" @click="load(pagination.page + 1)">下一页</button>
           </div>
         </div>
 
         <aside v-if="selected" class="detail-pane">
-          <h3>{{ selected.fishGameName }}</h3>
-          <p class="muted">ID：{{ selected.oId }} ｜ 当前状态：{{ statusText(selected.fishGameStatus) }}</p>
+          <div class="admin-panel__header"><h3>{{ selected.fishGameName }}</h3><button type="button" class="admin-btn admin-btn--sm" :disabled="acting" @click="selected = null">关闭详情</button></div>
+          <p class="admin-muted">ID：{{ selected.oId }} ｜ 当前状态：{{ statusText(selected.fishGameStatus) }}</p>
 
           <div class="diff-box">
             <h4>{{ selected.fishGameEditPending === 1 ? '现网字段 vs 待审修改对比' : '投稿详情' }}</h4>
@@ -200,31 +201,29 @@ onMounted(() => {
 
           <div v-if="canReview" class="action-stack">
             <label>拒绝原因（拒绝时可选填）</label>
-            <textarea v-model="rejectReason" class="input" rows="2" placeholder="说明拒绝原因" />
+            <textarea aria-label="说明拒绝原因" v-model="rejectReason" class="admin-textarea" rows="2" placeholder="说明拒绝原因" />
             <div class="btn-row">
-              <button class="btn btn-primary" :disabled="acting" @click="submitReview(1)">审核通过</button>
-              <button class="btn btn-danger" :disabled="acting" @click="submitReview(2)">拒绝</button>
-              <button class="btn btn-secondary" :disabled="acting" @click="submitReview(3)">停用</button>
+              <button class="admin-btn admin-btn--primary" :disabled="acting" @click="submitReview(1)">审核通过</button>
+              <button class="admin-btn admin-btn--danger" :disabled="acting" @click="submitReview(2)">拒绝</button>
+              <button class="admin-btn admin-btn--secondary" :disabled="acting" @click="submitReview(3)">停用</button>
             </div>
           </div>
         </aside>
       </div>
     </PageStateView>
-  </section>
+      </section>
+  </div>
 </template>
 
 <style scoped>
-.panel-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
-.filter-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 .checkbox-inline { display: inline-flex; gap: 0.35rem; align-items: center; font-size: 0.875rem; }
-.split-layout { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; align-items: start; }
-.detail-pane { border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 1rem; }
+.split-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+.detail-pane { border: 1px solid var(--fp-border); border-radius: 8px; padding: 1rem; }
 .diff-new { display: block; color: #b45309; font-weight: 600; margin-top: 0.25rem; }
 .kv-list dt { font-weight: 600; margin-top: 0.5rem; }
 .kv-list dd { margin: 0.2rem 0 0; word-break: break-all; }
 .btn-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
-.pager-bar { display: flex; gap: 0.75rem; align-items: center; margin-top: 0.75rem; }
-.notice-banner { padding: 0.5rem 0.75rem; border-radius: 6px; background: #eff6ff; color: #1d4ed8; margin-bottom: 0.75rem; }
 .row-active { background: rgba(59, 130, 246, 0.08); }
 @media (max-width: 960px) { .split-layout { grid-template-columns: 1fr; } }
+.split-layout.is-single-column { grid-template-columns: minmax(0, 1fr); }
 </style>

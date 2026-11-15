@@ -177,9 +177,9 @@ onMounted(() => {
     </header>
 
     <!-- 检索与筛选条 -->
-    <form class="admin-panel users-filter-form" @submit.prevent="submitSearch">
-      <div class="users-filter-form__field users-filter-form__field--grow">
-        <label class="users-filter-label" for="users-keyword">关键字检索</label>
+    <form class="admin-panel users-filter-form admin-search-bar" @submit.prevent="submitSearch">
+      <div class="admin-field users-filter-form__field users-filter-form__field--grow">
+        <label class="users-filter-label admin-sr-only" for="users-keyword">关键字检索</label>
         <input
           id="users-keyword"
           v-model="keywordInput"
@@ -189,8 +189,8 @@ onMounted(() => {
         />
       </div>
 
-      <div class="users-filter-form__field">
-        <label class="users-filter-label" for="users-status">账号状态</label>
+      <div class="admin-field admin-field--select users-filter-form__field">
+        <label class="users-filter-label admin-sr-only" for="users-status">账号状态</label>
         <select id="users-status" v-model="statusFilter" class="admin-select" @change="handleFilterChange">
           <option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">
             {{ opt.label }}
@@ -198,8 +198,8 @@ onMounted(() => {
         </select>
       </div>
 
-      <div class="users-filter-form__field">
-        <label class="users-filter-label" for="users-role">所属角色</label>
+      <div class="admin-field admin-field--select users-filter-form__field">
+        <label class="users-filter-label admin-sr-only" for="users-role">所属角色</label>
         <select id="users-role" v-model="roleFilter" class="admin-select" @change="handleFilterChange">
           <option value="all">全部角色</option>
           <option v-for="role in roleOptions" :key="role.oId" :value="role.oId">
@@ -230,7 +230,7 @@ onMounted(() => {
       @go-home="goHome"
     >
       <div class="admin-table-wrap">
-        <table class="admin-table" :class="{ 'admin-table--compact': theme.compactTable }">
+        <table class="admin-table admin-table--wide" :class="{ 'admin-table--compact': theme.compactTable }">
           <thead>
             <tr>
               <th>用户</th>
@@ -305,7 +305,7 @@ onMounted(() => {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 12px;
+  gap: 10px;
 }
 
 .users-filter-form__field {

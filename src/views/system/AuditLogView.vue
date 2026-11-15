@@ -276,12 +276,12 @@ onMounted(() => {
 
     <section class="admin-panel" aria-label="审计日志筛选条件">
       <form class="admin-filters al-filters" @submit.prevent="submitSearch">
-        <input
+        <label class="admin-field"><input aria-label="操作人 userId 或用户名..."
           v-model="operatorInput"
           type="search"
           class="admin-input al-input"
           placeholder="操作人 userId 或用户名..."
-        />
+        /></label>
         <select
           v-model="codeFilter"
           class="admin-select al-select"
@@ -294,12 +294,12 @@ onMounted(() => {
             #{{ opt.code }} · {{ opt.label }}{{ opt.targetType ? ` [${opt.targetType}]` : '' }}
           </option>
         </select>
-        <input
+        <label class="admin-field"><input aria-label="目标对象 ID (operationDataId)..."
           v-model="dataIdInput"
           type="search"
           class="admin-input al-input"
           placeholder="目标对象 ID (operationDataId)..."
-        />
+        /></label>
         <button type="submit" class="admin-btn admin-btn--primary" :disabled="loading">筛选查询</button>
         <button v-if="hasActiveFilter" type="button" class="admin-btn" @click="resetFilters">清空筛选</button>
       </form>

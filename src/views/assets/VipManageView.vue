@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { onBeforeRouteLeave, useRoute } from 'vue-router'
+import JsonFields from '@/components/config/JsonFields.vue'
+import { clone, mergeBenefits, parseObject, vipLevelPayload, type JsonObject } from '@/utils/configuration'
+import { useAuthStore } from '@/stores/auth'
 import {
   addCoupon,
   addVipLevel,
@@ -47,14 +50,69 @@ const editUserLvMap = ref<Record<string, string>>({})
 
 // 等级
 const levels = ref<VipLevelItem[]>([])
-const newLevel = ref({ lvCode: '', name: '', price: 1000, durationDays: 30, sortOrder: 10, description: '' })
+const newLevel = ref<JsonObject>({ lvCode: '', lvName: '', price: 1000, durationType: '', durationValue: 30 })
+const levelId = ref('')
+const levelBenefits = ref<JsonObject>({})
+const userEdit = ref<UserVipItem | null>(null)
+const userBenefits = ref<JsonObject>({})
+const grantBenefits = ref<JsonObject>({})
+const configError = ref('')
+const editorDirty = ref(false)
+const auth = useAuthStore()
+const grantLevel = computed(() => levels.value.find(item => item.oId === grantLevelOId.value))
+watch(grantLevel, (level) => {
+  try { grantBenefits.value = parseObject(level?.benefits); configError.value = '' }
+  catch (error) { grantBenefits.value = {}; configError.value = String(error) }
+})
+watch([newLevel, levelBenefits, userBenefits], () => { editorDirty.value = true }, { deep: true })
+function editLevel(level?: VipLevelItem) {
+  if (editorDirty.value && !window.confirm('放弃当前未保存的配置？')) return
+  try {
+    const benefits = parseObject(level?.benefits)
+    levelId.value = level?.oId || ''
+    newLevel.value = level ? { lvCode: level.lvCode, lvName: level.lvName, price: level.price, durationType: level.durationType, durationValue: level.durationValue } : { lvCode: '', lvName: '', price: 1000, durationType: '', durationValue: 30 }
+    levelBenefits.value = benefits
+    void nextTick(() => { editorDirty.value = false })
+    configError.value = ''
+  } catch (error) { configError.value = String(error) }
+}
+function editUserBenefits(row: UserVipItem) {
+  if (editorDirty.value && !window.confirm('放弃当前未保存的配置？')) return
+  try {
+    const matching = levels.value.filter(level => level.lvCode === row.lvCode)
+    userEdit.value = clone(row)
+    // 现有用户配置原样保留；仅唯一模板时补齐缺省值，避免同代码多套餐误匹配。
+    userBenefits.value = matching.length === 1 ? mergeBenefits(matching[0]?.benefits, row.configJson) : parseObject(row.configJson)
+    configError.value = ''
+    void nextTick(() => { editorDirty.value = false })
+  } catch (error) { configError.value = String(error); userEdit.value = null }
+}
+function closeUserEditor() { if (!editorDirty.value || window.confirm('放弃当前未保存的配置？')) { userEdit.value = null; editorDirty.value = false } }
+async function saveUserBenefits() {
+  if (!userEdit.value || busy.value || !window.confirm('确认保存该用户的会员权益配置？')) return
+  busy.value = true
+  try {
+    const configJson = JSON.stringify(userBenefits.value)
+    if (configJson.length > 4096) throw new Error('用户权益配置不能超过 4096 字符')
+    await updateUserVip(userEdit.value.userId, { configJson }, createIdempotencyKey('vip-benefits'))
+    userEdit.value = null; editorDirty.value = false; toast.value = '用户权益配置已保存'
+    await loadUserVips(vipPagination.value.page)
+  } catch (error) { toast.value = error instanceof Error ? error.message : '保存失败' }
+  finally { busy.value = false }
+}
+watch(() => auth.sessionEpoch, () => {
+  userEdit.value = null; userBenefits.value = {}; grantBenefits.value = {}; levelBenefits.value = {}; levels.value = []; userVips.value = []; coupons.value = []; configError.value = ''; toast.value = ''; editorDirty.value = false
+})
+onBeforeRouteLeave(() => !editorDirty.value || window.confirm('配置尚未保存，确认离开？'))
 
 // 优惠券
 const coupons = ref<CouponItem[]>([])
 const newCoupon = ref({ couponCode: '', couponType: 0, discount: 90, times: -1 })
 
 async function loadLevels() {
+  const epoch = auth.sessionEpoch
   const res = await fetchVipLevels()
+  if (epoch !== auth.sessionEpoch) return
   levels.value = res.items
   if (!grantLevelOId.value && res.items.length > 0) {
     grantLevelOId.value = res.items[0].oId
@@ -62,6 +120,7 @@ async function loadLevels() {
 }
 
 async function loadUserVips(page = 1) {
+  const epoch = auth.sessionEpoch
   const res = await fetchUserVips({
     p: page,
     size: 20,
@@ -69,12 +128,15 @@ async function loadUserVips(page = 1) {
     lvCode: filterLvCode.value.trim(),
     state: filterState.value,
   })
+  if (epoch !== auth.sessionEpoch) return
   userVips.value = res.items
   vipPagination.value = res.pagination
 }
 
 async function loadCoupons() {
+  const epoch = auth.sessionEpoch
   const res = await fetchCoupons()
+  if (epoch !== auth.sessionEpoch) return
   coupons.value = res.items
 }
 
@@ -87,12 +149,13 @@ async function refreshAll() {
 }
 
 async function handleGrantVip() {
-  if (!grantTarget.value.trim() || !grantLevelOId.value || busy.value) return
+  if (!grantTarget.value.trim() || !grantLevelOId.value || busy.value || configError.value) return
+  if (JSON.stringify(grantBenefits.value).length > 4096) { toast.value = '用户权益配置不能超过 4096 字符'; return }
   busy.value = true
   toast.value = ''
   try {
     await grantUserVip(
-      { target: grantTarget.value.trim(), levelOId: grantLevelOId.value },
+      { target: grantTarget.value.trim(), levelOId: grantLevelOId.value, configJson: JSON.stringify(grantBenefits.value) },
       createIdempotencyKey('vip-grant'),
     )
     toast.value = `已为用户 ${grantTarget.value} 开通 VIP 并发放初始礼包`
@@ -159,33 +222,17 @@ async function handleRefundVip(row: UserVipItem) {
 }
 
 async function handleAddLevel() {
-  if (!newLevel.value.lvCode.trim() || !newLevel.value.name.trim() || busy.value) return
-  busy.value = true
-  toast.value = ''
-  try {
-    await addVipLevel({ ...newLevel.value, enabled: 1 }, createIdempotencyKey('vip-lv-add'))
-    newLevel.value = { lvCode: '', name: '', price: 1000, durationDays: 30, sortOrder: 10, description: '' }
-    toast.value = '新增 VIP 等级成功'
-    await loadLevels()
-  } catch (err) {
-    toast.value = err instanceof ApiError ? err.message : '新增 VIP 等级失败'
-  } finally {
-    busy.value = false
-  }
-}
-
-async function handleBumpLevelPrice(lv: VipLevelItem, delta: number) {
-  if (busy.value) return
+  if (busy.value || configError.value) return
   busy.value = true
   try {
-    await updateVipLevel(lv.oId, { price: Math.max(0, lv.price + delta) }, createIdempotencyKey('vip-lv-upd'))
-    toast.value = `已更新 ${lv.name} 价格`
+    const payload = vipLevelPayload(newLevel.value, levelBenefits.value)
+    if (!window.confirm(`确认${levelId.value ? '更新' : '新增'}套餐「${payload.lvName}」及权益模板？`)) return
+    if (levelId.value) await updateVipLevel(levelId.value, payload, createIdempotencyKey('vip-level-edit'))
+    else await addVipLevel(payload, createIdempotencyKey('vip-level-add'))
+    editorDirty.value = false; toast.value = '会员套餐及权益模板已保存'
     await loadLevels()
-  } catch (err) {
-    toast.value = err instanceof ApiError ? err.message : '更新等级失败'
-  } finally {
-    busy.value = false
-  }
+  } catch (error) { toast.value = error instanceof Error ? error.message : '保存失败' }
+  finally { busy.value = false }
 }
 
 async function handleRemoveLevel(lv: VipLevelItem) {
@@ -193,7 +240,7 @@ async function handleRemoveLevel(lv: VipLevelItem) {
   busy.value = true
   try {
     await removeVipLevel(lv.oId, createIdempotencyKey('vip-lv-del'))
-    toast.value = `已删除等级 ${lv.name}`
+    toast.value = `已删除等级 ${lv.lvName}`
     await loadLevels()
   } catch (err) {
     toast.value = err instanceof ApiError ? err.message : '删除等级失败'
@@ -260,42 +307,45 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="panel-card">
-    <div class="panel-head">
+  <div class="admin-page">
+    <div class="admin-page__header">
       <div>
         <h2>VIP 与套餐优惠券</h2>
-        <p class="muted">管理用户 VIP 会员实例、VIP 等级配置及优惠券（次数 -1 表示无限制）。</p>
+        <p class="admin-muted">管理用户 VIP 会员实例、VIP 等级配置及优惠券（次数 -1 表示无限制）。</p>
       </div>
       <div class="tab-row">
-        <button class="btn" :class="{ 'btn-primary': tab === 'users' }" @click="tab = 'users'">用户 VIP 实例</button>
-        <button class="btn" :class="{ 'btn-primary': tab === 'levels' }" @click="tab = 'levels'">VIP 等级配置</button>
-        <button class="btn" :class="{ 'btn-primary': tab === 'coupons' }" @click="tab = 'coupons'">优惠券管理</button>
+        <button class="admin-btn" :class="{ 'admin-btn--primary': tab === 'users' }" @click="tab = 'users'">用户 VIP 实例</button>
+        <button class="admin-btn" :class="{ 'admin-btn--primary': tab === 'levels' }" @click="tab = 'levels'">VIP 等级配置</button>
+        <button class="admin-btn" :class="{ 'admin-btn--primary': tab === 'coupons' }" @click="tab = 'coupons'">优惠券管理</button>
       </div>
     </div>
+    <section class="admin-panel">
 
+    <p v-if="configError" class="admin-alert admin-alert--danger" role="alert">{{ configError }}</p>
     <p v-if="toast" class="notice-banner">{{ toast }}</p>
 
     <div v-if="tab === 'users'">
-      <form class="filter-row toolbar-gap" @submit.prevent="handleGrantVip">
-        <input v-model="grantTarget" class="input" placeholder="用户名或用户 ID" required />
-        <select v-model="grantLevelOId" class="input">
-          <option v-for="lv in levels" :key="lv.oId" :value="lv.oId">{{ lv.name }} ({{ lv.lvCode }})</option>
-        </select>
-        <button class="btn btn-primary" type="submit" :disabled="busy">免费开通 VIP（含初始礼包）</button>
+      <form class="admin-filter-bar toolbar-gap" @submit.prevent="handleGrantVip">
+        <label class="admin-field"><input aria-label="用户名或用户 ID" v-model="grantTarget" class="admin-input" placeholder="用户名或用户 ID" required /></label>
+        <label class="admin-field"><span class="admin-field__label">会员套餐</span><select aria-label="会员套餐" v-model="grantLevelOId" class="admin-select">
+          <option v-for="lv in levels" :key="lv.oId" :value="lv.oId">{{ lv.lvName }} ({{ lv.lvCode }})</option>
+        </select></label>
+        <button class="admin-btn admin-btn--primary" type="submit" :disabled="busy || !!configError">免费开通 VIP（含初始礼包）</button>
+        <JsonFields v-model="grantBenefits" label="开通权益（按所选套餐模板）" :disabled="busy || !!configError" fixed-keys style="flex-basis:100%" />
       </form>
 
-      <div class="filter-row toolbar-gap">
-        <input v-model="filterUserName" class="input" placeholder="按用户名检索" @keyup.enter="loadUserVips(1)" />
-        <input v-model="filterLvCode" class="input" placeholder="等级代码" @keyup.enter="loadUserVips(1)" />
-        <select v-model="filterState" class="input" @change="loadUserVips(1)">
+      <div class="admin-filter-bar toolbar-gap admin-search-bar">
+        <input aria-label="按用户名检索" v-model="filterUserName" class="admin-input" placeholder="按用户名检索" @keyup.enter="loadUserVips(1)" />
+        <input aria-label="等级代码" v-model="filterLvCode" class="admin-input" placeholder="等级代码" @keyup.enter="loadUserVips(1)" />
+        <select aria-label="会员状态" v-model="filterState" class="admin-select" @change="loadUserVips(1)">
           <option value="">全部状态</option>
           <option value="1">有效</option>
           <option value="0">已停用</option>
         </select>
-        <button class="btn btn-secondary" @click="loadUserVips(1)">查询</button>
+        <button class="admin-btn admin-btn--secondary" @click="loadUserVips(1)">查询</button>
       </div>
 
-      <table class="data-table">
+      <div class="admin-table-wrap"><table class="admin-table">
         <thead>
           <tr>
             <th>用户</th>
@@ -313,37 +363,51 @@ onMounted(() => {
             <td>{{ row.expiresAt ? formatDateTime(row.expiresAt) : '-' }}</td>
             <td>
               <div class="btn-row">
-                <input v-model.number="extendDaysMap[row.userId]" class="input num-input" type="number" min="1" placeholder="30天" />
-                <button class="btn btn-sm btn-primary" :disabled="busy" @click="handleExtendVip(row)">续期</button>
-                <button class="btn btn-sm" :disabled="busy" @click="handleToggleVipState(row)">
+                <button class="admin-btn admin-btn--sm" :disabled="busy" @click="editUserBenefits(row)">编辑权益</button>
+                <input aria-label="30天" v-model.number="extendDaysMap[row.userId]" class="admin-input num-input" type="number" min="1" placeholder="30天" />
+                <button class="admin-btn admin-btn--sm admin-btn--primary" :disabled="busy" @click="handleExtendVip(row)">续期</button>
+                <button class="admin-btn admin-btn--sm" :disabled="busy" @click="handleToggleVipState(row)">
                   {{ row.state === 1 ? '停用' : '启用' }}
                 </button>
-                <button v-if="row.state === 1" class="btn btn-sm btn-danger" :disabled="busy" @click="handleRefundVip(row)">
+                <button v-if="row.state === 1" class="admin-btn admin-btn--sm admin-btn--danger" :disabled="busy" @click="handleRefundVip(row)">
                   折算退订
                 </button>
               </div>
             </td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
 
+      <form v-if="userEdit" class="editor-form" @submit.prevent="saveUserBenefits">
+        <h3>用户 {{ userEdit.userName || userEdit.userId }} 的会员权益</h3>
+        <JsonFields v-model="userBenefits" label="用户权益" :disabled="busy" fixed-keys />
+        <button class="admin-btn admin-btn--primary" :disabled="busy">保存用户权益</button>
+        <button class="admin-btn" type="button" :disabled="busy" @click="closeUserEditor">关闭编辑</button>
+      </form>
       <div class="pager-bar">
-        <button class="btn btn-sm" :disabled="vipPagination.page <= 1" @click="loadUserVips(vipPagination.page - 1)">上一页</button>
+        <button class="admin-btn admin-btn--sm" :disabled="vipPagination.page <= 1" @click="loadUserVips(vipPagination.page - 1)">上一页</button>
         <span>第 {{ vipPagination.page }} / {{ vipPagination.totalPages }} 页（共 {{ vipPagination.total }} 条）</span>
-        <button class="btn btn-sm" :disabled="vipPagination.page >= vipPagination.totalPages" @click="loadUserVips(vipPagination.page + 1)">下一页</button>
+        <button class="admin-btn admin-btn--sm" :disabled="vipPagination.page >= vipPagination.totalPages" @click="loadUserVips(vipPagination.page + 1)">下一页</button>
       </div>
     </div>
 
     <div v-else-if="tab === 'levels'">
-      <form class="filter-row toolbar-gap" @submit.prevent="handleAddLevel">
-        <input v-model="newLevel.lvCode" class="input" placeholder="等级代码 (如 VIP1)" required />
-        <input v-model="newLevel.name" class="input" placeholder="等级名称" required />
-        <input v-model.number="newLevel.price" class="input num-input" type="number" min="0" placeholder="积分价格" />
-        <input v-model.number="newLevel.durationDays" class="input num-input" type="number" min="1" placeholder="天数" />
-        <button class="btn btn-primary" type="submit" :disabled="busy">新增等级</button>
+      <form class="editor-form" @submit.prevent="handleAddLevel">
+        <h3>{{ levelId ? '编辑套餐' : '新增套餐' }}</h3>
+        <div class="editor-grid">
+          <label>等级代码<input v-model="newLevel.lvCode" class="admin-input" required maxlength="64" /></label>
+          <label>等级名称<input v-model="newLevel.lvName" class="admin-input" required maxlength="64" /></label>
+          <label>积分价格<input v-model.number="newLevel.price" class="admin-input" type="number" min="0" required /></label>
+          <label>周期类型<input v-model="newLevel.durationType" class="admin-input" list="vip-duration-types" required placeholder="沿用已有套餐类型" /></label>
+          <datalist id="vip-duration-types"><option v-for="value in [...new Set(levels.map(item => item.durationType))]" :key="value" :value="value" /></datalist>
+          <label>有效天数<input v-model.number="newLevel.durationValue" class="admin-input" type="number" min="1" step="1" required /></label>
+        </div>
+        <JsonFields v-model="levelBenefits" label="权益模板" :disabled="busy || !!configError" />
+        <button class="admin-btn admin-btn--primary" :disabled="busy || !!configError">保存套餐与权益</button>
+        <button type="button" class="admin-btn" :disabled="busy" @click="editLevel()">新建套餐</button>
       </form>
 
-      <table class="data-table">
+      <div class="admin-table-wrap"><table class="admin-table">
         <thead>
           <tr>
             <th>代码</th>
@@ -356,34 +420,33 @@ onMounted(() => {
         <tbody>
           <tr v-for="lv in levels" :key="lv.oId">
             <td><code>{{ lv.lvCode }}</code></td>
-            <td>{{ lv.name }}</td>
+            <td>{{ lv.lvName }}</td>
             <td>{{ lv.price }}</td>
-            <td>{{ lv.durationDays }}</td>
+            <td>{{ lv.durationValue }} 天（{{ lv.durationType }}）</td>
             <td>
               <div class="btn-row">
-                <button class="btn btn-sm" :disabled="busy" @click="handleBumpLevelPrice(lv, 100)">+100分</button>
-                <button class="btn btn-sm" :disabled="busy" @click="handleBumpLevelPrice(lv, -100)">-100分</button>
-                <button class="btn btn-sm btn-danger" :disabled="busy" @click="handleRemoveLevel(lv)">删除</button>
+                <button class="admin-btn admin-btn--sm" :disabled="busy" @click="editLevel(lv)">编辑套餐与权益</button>
+                <button class="admin-btn admin-btn--sm admin-btn--danger" :disabled="busy" @click="handleRemoveLevel(lv)">删除</button>
               </div>
             </td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
     </div>
 
     <div v-else>
-      <form class="filter-row toolbar-gap" @submit.prevent="handleAddCoupon">
-        <input v-model="newCoupon.couponCode" class="input" placeholder="自定义码(8-32位，留空自动生成)" />
-        <select v-model.number="newCoupon.couponType" class="input">
+      <form class="admin-filter-bar toolbar-gap" @submit.prevent="handleAddCoupon">
+        <label class="admin-field"><input aria-label="自定义码(8-32位，留空自动生成)" v-model="newCoupon.couponCode" class="admin-input" placeholder="自定义码(8-32位，留空自动生成)" /></label>
+        <select aria-label="优惠券类型" v-model.number="newCoupon.couponType" class="admin-select">
           <option :value="0">折扣百分比(1-100)</option>
           <option :value="1">立减积分</option>
         </select>
-        <input v-model.number="newCoupon.discount" class="input num-input" type="number" min="1" placeholder="数值" />
-        <input v-model.number="newCoupon.times" class="input num-input" type="number" min="-1" placeholder="次数(-1无限)" />
-        <button class="btn btn-primary" type="submit" :disabled="busy">创建优惠券</button>
+        <label class="admin-field"><input aria-label="数值" v-model.number="newCoupon.discount" class="admin-input num-input" type="number" min="1" placeholder="数值" /></label>
+        <label class="admin-field"><input aria-label="次数(-1无限)" v-model.number="newCoupon.times" class="admin-input num-input" type="number" min="-1" placeholder="次数(-1无限)" /></label>
+        <button class="admin-btn admin-btn--primary" type="submit" :disabled="busy">创建优惠券</button>
       </form>
 
-      <table class="data-table">
+      <div class="admin-table-wrap"><table class="admin-table">
         <thead>
           <tr>
             <th>优惠券码</th>
@@ -401,23 +464,20 @@ onMounted(() => {
             <td>{{ c.times === -1 ? '无限制 (-1)' : c.times }}</td>
             <td>
               <div class="btn-row">
-                <button class="btn btn-sm" :disabled="busy" @click="handleUpdateCouponTimes(c, -1)">设为无限(-1)</button>
-                <button class="btn btn-sm" :disabled="busy" @click="handleUpdateCouponTimes(c, 10)">设为10次</button>
-                <button class="btn btn-sm btn-danger" :disabled="busy" @click="handleRemoveCoupon(c)">删除</button>
+                <button class="admin-btn admin-btn--sm" :disabled="busy" @click="handleUpdateCouponTimes(c, -1)">设为无限(-1)</button>
+                <button class="admin-btn admin-btn--sm" :disabled="busy" @click="handleUpdateCouponTimes(c, 10)">设为10次</button>
+                <button class="admin-btn admin-btn--sm admin-btn--danger" :disabled="busy" @click="handleRemoveCoupon(c)">删除</button>
               </div>
             </td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
     </div>
-  </section>
+      </section>
+  </div>
 </template>
 
 <style scoped>
-.panel-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
-.tab-row, .filter-row, .btn-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 .toolbar-gap { margin-bottom: 0.75rem; }
 .num-input { width: 96px; }
-.pager-bar { display: flex; gap: 0.75rem; align-items: center; margin-top: 0.75rem; }
-.notice-banner { padding: 0.5rem 0.75rem; border-radius: 6px; background: #eff6ff; color: #1d4ed8; margin-bottom: 0.75rem; }
 </style>

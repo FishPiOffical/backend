@@ -183,38 +183,39 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="panel-card">
-    <div class="panel-head">
+  <div class="admin-page">
+    <div class="admin-page__header">
       <div>
         <h2>鱼游与大事记日常维护</h2>
-        <p class="muted">
+        <p class="admin-muted">
           日常维护入口；待审队列可在 <RouterLink to="/review/fish-games">鱼游审核</RouterLink> /
           <RouterLink to="/review/milestones">大事记审核</RouterLink> 处理。
         </p>
       </div>
       <div class="tab-row">
-        <button v-if="canFish" class="btn" :class="{ 'btn-primary': tab === 'fish' }" @click="tab = 'fish'">鱼游维护</button>
-        <button v-if="canMilestone" class="btn" :class="{ 'btn-primary': tab === 'milestones' }" @click="tab = 'milestones'">大事记维护</button>
+        <button v-if="canFish" class="admin-btn" :class="{ 'admin-btn--primary': tab === 'fish' }" @click="tab = 'fish'">鱼游维护</button>
+        <button v-if="canMilestone" class="admin-btn" :class="{ 'admin-btn--primary': tab === 'milestones' }" @click="tab = 'milestones'">大事记维护</button>
       </div>
     </div>
+    <section class="admin-panel">
 
     <p v-if="toast" class="notice-banner">{{ toast }}</p>
 
     <div v-if="tab === 'fish' && canFish">
-      <div class="filter-row toolbar-gap">
-        <input v-model="fishForm.fishGameName" class="input" placeholder="游戏名称" />
-        <input v-model="fishForm.fishGameUrl" class="input" placeholder="游戏链接" />
-        <input v-model="fishForm.fishGameTag" class="input" placeholder="标签" />
-        <select v-model.number="fishForm.fishGameStatus" class="input">
+      <div class="admin-filter-bar toolbar-gap">
+        <input aria-label="游戏名称" v-model="fishForm.fishGameName" class="admin-input" placeholder="游戏名称" />
+        <input aria-label="游戏链接" v-model="fishForm.fishGameUrl" class="admin-input" placeholder="游戏链接" />
+        <input aria-label="标签" v-model="fishForm.fishGameTag" class="admin-input" placeholder="标签" />
+        <select aria-label="鱼游状态" v-model.number="fishForm.fishGameStatus" class="admin-select">
           <option :value="1">已通过</option>
           <option :value="0">待审核</option>
           <option :value="3">已停用</option>
         </select>
-        <button class="btn btn-primary" :disabled="busy" @click="saveFish">{{ fishForm.oId ? '保存修改' : '手工新增' }}</button>
-        <button v-if="fishForm.oId" class="btn" @click="resetFish">取消</button>
+        <button class="admin-btn admin-btn--primary" :disabled="busy" @click="saveFish">{{ fishForm.oId ? '保存修改' : '手工新增' }}</button>
+        <button v-if="fishForm.oId" class="admin-btn" @click="resetFish">取消</button>
       </div>
 
-      <table class="data-table">
+      <div class="admin-table-wrap"><table class="admin-table">
         <thead>
           <tr><th>名称</th><th>链接</th><th>标签</th><th>状态</th><th>操作</th></tr>
         </thead>
@@ -224,41 +225,41 @@ onMounted(async () => {
             <td><code>{{ g.fishGameUrl }}</code></td>
             <td>{{ g.fishGameTag || '-' }}</td>
             <td>{{ g.fishGameStatus }}</td>
-            <td><button class="btn btn-sm" @click="editFish(g)">编辑</button></td>
+            <td><button class="admin-btn admin-btn--sm" @click="editFish(g)">编辑</button></td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
 
       <div class="sub-card" style="margin-top: 1rem;">
-        <div class="panel-head">
+        <div class="admin-page__header">
           <h4>批量导出 / 导入 JSON</h4>
           <div class="btn-row">
-            <button class="btn btn-secondary" @click="handleExportFish">导出全部</button>
-            <button class="btn btn-primary" :disabled="busy" @click="handleImportFish">执行导入</button>
+            <button class="admin-btn admin-btn--secondary" @click="handleExportFish">导出全部</button>
+            <button class="admin-btn admin-btn--primary" :disabled="busy" @click="handleImportFish">执行导入</button>
           </div>
         </div>
-        <textarea v-model="importJson" class="input mono-area" rows="5" placeholder="粘贴鱼游 JSON 数组..." />
+        <textarea aria-label="粘贴鱼游 JSON 数组..." v-model="importJson" class="admin-textarea mono-area" rows="5" placeholder="粘贴鱼游 JSON 数组..." />
       </div>
     </div>
 
     <div v-else-if="canMilestone">
       <div v-if="msForm.oId" class="sub-card toolbar-gap">
         <h4>编辑大事记</h4>
-        <div class="filter-row">
-          <input v-model="msForm.milestoneTitle" class="input" placeholder="标题" />
-          <input v-model="msForm.milestoneDate" class="input" placeholder="日期" />
-          <select v-model.number="msForm.milestoneStatus" class="input">
+        <div class="admin-filter-bar">
+          <input aria-label="标题" v-model="msForm.milestoneTitle" class="admin-input" placeholder="标题" />
+          <input aria-label="日期" v-model="msForm.milestoneDate" class="admin-input" placeholder="日期" />
+          <select aria-label="大事记状态" v-model.number="msForm.milestoneStatus" class="admin-select">
             <option :value="2">已通过</option>
             <option :value="1">待审核</option>
             <option :value="3">已拒绝</option>
           </select>
-          <button class="btn btn-primary" :disabled="busy" @click="saveMs">保存</button>
-          <button class="btn" @click="msForm.oId = ''">取消</button>
+          <button class="admin-btn admin-btn--primary" :disabled="busy" @click="saveMs">保存</button>
+          <button class="admin-btn" @click="msForm.oId = ''">取消</button>
         </div>
-        <textarea v-model="msForm.milestoneContent" class="input" rows="2" style="margin-top: 0.5rem; width: 100%;" placeholder="正文内容" />
+        <textarea aria-label="正文内容" v-model="msForm.milestoneContent" class="admin-textarea" rows="2" style="margin-top: 0.5rem; width: 100%;" placeholder="正文内容" />
       </div>
 
-      <table class="data-table">
+      <div class="admin-table-wrap"><table class="admin-table">
         <thead>
           <tr><th>标题</th><th>日期</th><th>状态</th><th>操作</th></tr>
         </thead>
@@ -269,22 +270,20 @@ onMounted(async () => {
             <td>{{ m.milestoneStatus }}</td>
             <td>
               <div class="btn-row">
-                <button class="btn btn-sm" @click="editMs(m)">编辑</button>
-                <button class="btn btn-sm btn-danger" :disabled="busy" @click="handleRemoveMs(m)">删除</button>
+                <button class="admin-btn admin-btn--sm" @click="editMs(m)">编辑</button>
+                <button class="admin-btn admin-btn--sm admin-btn--danger" :disabled="busy" @click="handleRemoveMs(m)">删除</button>
               </div>
             </td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
     </div>
-  </section>
+      </section>
+  </div>
 </template>
 
 <style scoped>
-.panel-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
-.tab-row, .filter-row, .btn-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 .toolbar-gap { margin-bottom: 0.75rem; }
-.sub-card { border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 0.9rem; }
+.sub-card { border: 1px solid var(--fp-border); border-radius: 8px; padding: 0.9rem; }
 .mono-area { width: 100%; font-family: monospace; font-size: 0.82rem; }
-.notice-banner { padding: 0.5rem 0.75rem; border-radius: 6px; background: #eff6ff; color: #1d4ed8; margin-bottom: 0.75rem; }
 </style>

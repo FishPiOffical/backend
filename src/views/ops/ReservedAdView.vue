@@ -96,24 +96,25 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="panel-card">
-    <div class="panel-head">
+  <div class="admin-page">
+    <div class="admin-page__header">
       <div>
         <h2>保留词与广告位维护</h2>
-        <p class="muted">维护社区敏感词/保留词词表，以及侧边栏与顶栏广告位片段（源码模式安全编辑）。</p>
+        <p class="admin-muted">维护社区敏感词/保留词词表，以及侧边栏与顶栏广告位片段（源码模式安全编辑）。</p>
       </div>
     </div>
+    <section class="admin-panel">
 
     <p v-if="toast" class="notice-banner">{{ toast }}</p>
 
     <div class="split-layout">
       <div v-if="canRw" class="sub-card">
         <h3>保留词管理（{{ words.length }}）</h3>
-        <div class="filter-row toolbar-gap">
-          <input v-model="newWord" class="input" placeholder="新增保留词" />
-          <button class="btn btn-primary" :disabled="busy" @click="handleAddWord">添加</button>
-          <input v-model="rwKeyword" class="input" placeholder="过滤保留词" @keyup.enter="loadWords" />
-          <button class="btn btn-secondary" @click="loadWords">过滤</button>
+        <div class="admin-filter-bar toolbar-gap">
+          <input aria-label="新增保留词" v-model="newWord" class="admin-input" placeholder="新增保留词" />
+          <button class="admin-btn admin-btn--primary" :disabled="busy" @click="handleAddWord">添加</button>
+          <input aria-label="过滤保留词" v-model="rwKeyword" class="admin-input" placeholder="过滤保留词" @keyup.enter="loadWords" />
+          <button class="admin-btn admin-btn--secondary" @click="loadWords">过滤</button>
         </div>
         <div class="word-list">
           <span v-for="w in words" :key="w.oId || w.word" class="word-chip">
@@ -127,27 +128,25 @@ onMounted(async () => {
         <h3>广告位配置</h3>
         <div class="form-grid">
           <label>侧边全幅广告（sideFullAd）</label>
-          <textarea v-model="sideFullAd" class="input mono-area" rows="6" />
-          <label>顶栏横幅（headerBanner）</label>
-          <textarea v-model="headerBanner" class="input mono-area" rows="6" />
-          <button class="btn btn-primary" :disabled="busy" @click="handleSaveAds">保存广告位配置</button>
+          <textarea id="ad-side" aria-label="侧栏全幅广告" v-model="sideFullAd" class="admin-textarea mono-area" rows="6" />
+          <label for="ad-header">顶栏横幅（headerBanner）</label>
+          <textarea id="ad-header" v-model="headerBanner" class="admin-textarea mono-area" rows="6" />
+          <button class="admin-btn admin-btn--primary" :disabled="busy" @click="handleSaveAds">保存广告位配置</button>
         </div>
       </div>
     </div>
-  </section>
+      </section>
+  </div>
 </template>
 
 <style scoped>
-.panel-head { margin-bottom: 1rem; }
-.split-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
-.sub-card { border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 0.9rem; }
-.filter-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.split-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: start; }
+.sub-card { border: 1px solid var(--fp-border); border-radius: 8px; padding: 0.9rem; }
 .toolbar-gap { margin: 0.5rem 0 0.75rem; }
 .word-list { display: flex; gap: 0.4rem; flex-wrap: wrap; max-height: 360px; overflow-y: auto; }
-.word-chip { display: inline-flex; align-items: center; gap: 0.25rem; background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.85rem; }
+.word-chip { display: inline-flex; align-items: center; gap: 0.25rem; background: var(--fp-elevated); padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.85rem; }
 .chip-x { border: 0; background: transparent; cursor: pointer; font-weight: 700; }
 .form-grid { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
 .mono-area { font-family: monospace; font-size: 0.82rem; }
-.notice-banner { padding: 0.5rem 0.75rem; border-radius: 6px; background: #eff6ff; color: #1d4ed8; margin-bottom: 0.75rem; }
 @media (max-width: 960px) { .split-layout { grid-template-columns: 1fr; } }
 </style>

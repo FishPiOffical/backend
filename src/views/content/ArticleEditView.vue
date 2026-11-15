@@ -842,7 +842,7 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="ae-field ae-checkbox-wrap">
-                <label class="ae-checkbox">
+                <label class="ae-checkbox admin-choice">
                   <input v-model="form.articleCommentable" type="checkbox" :disabled="!isFormEditable || mutating" />
                   <span>允许评论回复</span>
                 </label>

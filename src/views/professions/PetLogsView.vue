@@ -128,11 +128,11 @@ onMounted(() => load(1))
     </header>
 
     <section class="admin-panel admin-stack">
-      <div class="admin-filter-bar" style="margin: 0">
-        <input v-model="userFilter" class="admin-input" placeholder="用户名 / 用户 ID" @keyup.enter="load(1)" />
+      <div class="admin-filter-bar admin-search-bar" style="margin: 0">
+        <input aria-label="用户名 / 用户 ID" v-model="userFilter" class="admin-input" placeholder="用户名 / 用户 ID" @keyup.enter="load(1)" />
         <input v-model="fromDate" class="admin-input" type="date" aria-label="开始日期" />
         <input v-model="toDate" class="admin-input" type="date" aria-label="结束日期" />
-        <select v-model="operationFilter" class="admin-select">
+        <select aria-label="日志操作" v-model="operationFilter" class="admin-select">
           <option value="">全部操作类型</option>
           <option v-for="[k, label] in operationOptions" :key="k" :value="k">{{ label }}</option>
         </select>

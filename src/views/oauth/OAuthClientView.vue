@@ -447,7 +447,7 @@ onMounted(() => {
       @go-login="goLogin"
       @go-home="goHome"
     >
-      <div class="oa-layout">
+      <div class="oa-layout" :class="{ 'is-single-column': !detail }">
         <div class="oa-list-col">
           <div class="admin-table-wrap">
             <table class="admin-table" :class="{ 'admin-table--compact': theme.compactTable }">
@@ -830,4 +830,5 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
 }
+.oa-layout.is-single-column { grid-template-columns: minmax(0, 1fr); }
 </style>

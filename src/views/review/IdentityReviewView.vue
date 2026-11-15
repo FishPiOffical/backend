@@ -453,7 +453,7 @@ onMounted(() => {
       @go-login="goLogin"
       @go-home="goHome"
     >
-      <div class="id-layout">
+      <div class="id-layout" :class="{ 'is-single-column': !selectedItem }">
         <div class="id-list-col">
           <div class="admin-table-wrap">
             <table class="admin-table" :class="{ 'admin-table--compact': theme.compactTable }">
@@ -607,16 +607,16 @@ onMounted(() => {
               必须先打开查看认证材料后，方可执行“通过”或“驳回”。
             </p>
 
-            <div class="id-decision-radios">
-              <label class="id-radio-label">
-                <input v-model="decisionStatus" type="radio" value="approved" :disabled="!hasOpenedSelectedMaterial || submitting" />
+            <fieldset class="admin-choice-group"><legend>审核结论</legend>
+              <label class="admin-choice">
+                <input v-model="decisionStatus" type="radio" name="identity-decision" value="approved" :disabled="!hasOpenedSelectedMaterial || submitting" />
                 <span>通过申请</span>
               </label>
-              <label class="id-radio-label">
-                <input v-model="decisionStatus" type="radio" value="rejected" :disabled="!hasOpenedSelectedMaterial || submitting" />
+              <label class="admin-choice">
+                <input v-model="decisionStatus" type="radio" name="identity-decision" value="rejected" :disabled="!hasOpenedSelectedMaterial || submitting" />
                 <span>驳回申请</span>
               </label>
-            </div>
+            </fieldset>
 
             <div class="id-decision-field">
               <label for="id-note-input">审核备注{{ decisionStatus === 'rejected' ? '（驳回必填）' : '（可选）' }}</label>
@@ -904,4 +904,5 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
 }
+.id-layout.is-single-column { grid-template-columns: minmax(0, 1fr); }
 </style>

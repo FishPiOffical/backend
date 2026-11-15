@@ -17,6 +17,10 @@ withDefaults(
     title?: string
     description?: string
     errorMessage?: string
+    emptyText?: string
+    filteredEmptyText?: string
+    emptyTitle?: string
+    emptyDesc?: string
   }>(),
   {
     title: '',
@@ -73,15 +77,15 @@ const emit = defineEmits<{
 
     <template v-else-if="state === 'filtered-empty'">
       <h3 class="state-box__title">{{ title || '当前筛选条件下无匹配结果' }}</h3>
-      <p class="state-box__desc">{{ description || '可尝试调整状态页签或清空关键字后重新检索。' }}</p>
+      <p class="state-box__desc">{{ description || filteredEmptyText || '可尝试调整状态页签或清空关键字后重新检索。' }}</p>
       <div class="state-box__actions">
         <button type="button" class="admin-btn" @click="emit('resetFilters')">重置筛选条件</button>
       </div>
     </template>
 
     <template v-else>
-      <h3 class="state-box__title">{{ title || '暂无记录' }}</h3>
-      <p class="state-box__desc">{{ description || '当前业务队列中尚无需要处理的数据。' }}</p>
+      <h3 class="state-box__title">{{ title || emptyTitle || '暂无记录' }}</h3>
+      <p class="state-box__desc">{{ description || emptyDesc || emptyText || '当前业务队列中尚无需要处理的数据。' }}</p>
     </template>
   </section>
 </template>

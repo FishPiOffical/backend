@@ -63,8 +63,8 @@ const breadcrumbs = computed(() => {
 })
 
 function isItemActive(item: AdminNavItem): boolean {
-  if (item.to === '/users' && route.path.startsWith('/users')) {
-    return true
+  if (item.to === '/users') {
+    return route.name === 'users' || route.name === 'user-detail'
   }
   return route.path === item.to
 }
@@ -76,7 +76,7 @@ async function handleLogout(): Promise<void> {
 </script>
 
 <template>
-  <div class="admin-shell" :class="{ 'is-collapsed': collapsed }">
+  <div class="admin-shell" :class="{ 'is-collapsed': collapsed, 'is-compact': theme.compactTable }">
     <div v-if="mobileMenuOpen" class="shell-backdrop" @click="mobileMenuOpen = false" />
 
     <aside class="shell-sidebar" :class="{ 'is-mobile-open': mobileMenuOpen }" aria-label="后台主导航">
@@ -541,7 +541,7 @@ async function handleLogout(): Promise<void> {
 
 .shell-notice {
   width: 100%;
-  max-width: calc(var(--fp-content-max-w) + 48px);
+  max-width: none;
   margin: 14px auto 0;
   padding: 12px 16px;
   border-radius: var(--fp-radius-md);
@@ -573,7 +573,7 @@ async function handleLogout(): Promise<void> {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--fp-content-gap);
 }
 
 .shell-backdrop {

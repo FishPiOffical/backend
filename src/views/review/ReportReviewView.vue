@@ -363,9 +363,9 @@ onMounted(() => {
         </button>
       </div>
 
-      <div class="report-toolbar__right">
+      <div class="report-toolbar__right admin-search-bar">
         <label class="report-filter-label">
-          <span>对象类型</span>
+          <span class="admin-sr-only">对象类型</span>
           <select v-model="dataTypeFilter" class="admin-select report-select" @change="changeDataType">
             <option v-for="opt in dataTypeOptions" :key="opt.value" :value="opt.value">
               {{ opt.label }}
@@ -421,7 +421,7 @@ onMounted(() => {
       @go-login="goLogin"
       @go-home="goHome"
     >
-      <div class="report-layout">
+      <div class="report-layout" :class="{ 'is-single-column': !selectedItem }">
         <!-- 左侧队列 -->
         <div class="report-list-col">
           <div class="admin-table-wrap">
@@ -885,4 +885,5 @@ onMounted(() => {
     position: static;
   }
 }
+.report-layout.is-single-column { grid-template-columns: minmax(0, 1fr); }
 </style>

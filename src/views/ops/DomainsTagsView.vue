@@ -195,34 +195,35 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="panel-card">
-    <div class="panel-head">
+  <div class="admin-page">
+    <div class="admin-page__header">
       <div>
         <h2>领域、导航与标签</h2>
-        <p class="muted">维护社区领域导航排序、领域绑定标签及全站标签词库。</p>
+        <p class="admin-muted">维护社区领域导航排序、领域绑定标签及全站标签词库。</p>
       </div>
       <div class="tab-row">
-        <button v-if="canDomains" class="btn" :class="{ 'btn-primary': tab === 'domains' }" @click="tab = 'domains'">领域与导航</button>
-        <button v-if="canTags" class="btn" :class="{ 'btn-primary': tab === 'tags' }" @click="tab = 'tags'">标签维护</button>
+        <button v-if="canDomains" class="admin-btn" :class="{ 'admin-btn--primary': tab === 'domains' }" @click="tab = 'domains'">领域与导航</button>
+        <button v-if="canTags" class="admin-btn" :class="{ 'admin-btn--primary': tab === 'tags' }" @click="tab = 'tags'">标签维护</button>
       </div>
     </div>
+    <section class="admin-panel">
 
     <p v-if="toast" class="notice-banner">{{ toast }}</p>
 
     <div v-if="tab === 'domains' && canDomains">
-      <div class="filter-row toolbar-gap">
-        <input v-model="domainForm.domainTitle" class="input" placeholder="领域名称" />
-        <input v-model="domainForm.domainURI" class="input" placeholder="URI 标识" />
-        <input v-model.number="domainForm.domainSort" class="input num-input" type="number" placeholder="排序" />
-        <select v-model.number="domainForm.domainNav" class="input">
+      <div class="admin-filter-bar toolbar-gap">
+        <input aria-label="领域名称" v-model="domainForm.domainTitle" class="admin-input" placeholder="领域名称" />
+        <input aria-label="URI 标识" v-model="domainForm.domainURI" class="admin-input" placeholder="URI 标识" />
+        <input aria-label="排序" v-model.number="domainForm.domainSort" class="admin-input num-input" type="number" placeholder="排序" />
+        <select aria-label="导航显示" v-model.number="domainForm.domainNav" class="admin-select">
           <option :value="1">显示在导航</option>
           <option :value="0">不在导航显示</option>
         </select>
-        <button class="btn btn-primary" :disabled="busy" @click="saveDomain">{{ domainForm.oId ? '保存修改' : '新增领域' }}</button>
-        <button v-if="domainForm.oId" class="btn" @click="resetDomainForm">取消编辑</button>
+        <button class="admin-btn admin-btn--primary" :disabled="busy" @click="saveDomain">{{ domainForm.oId ? '保存修改' : '新增领域' }}</button>
+        <button v-if="domainForm.oId" class="admin-btn" @click="resetDomainForm">取消编辑</button>
       </div>
 
-      <table class="data-table">
+      <div class="admin-table-wrap"><table class="admin-table">
         <thead>
           <tr>
             <th>名称 / URI</th>
@@ -235,7 +236,7 @@ onMounted(async () => {
           <tr v-for="d in domains" :key="d.oId">
             <td>
               <strong>{{ d.domainTitle }}</strong>
-              <div class="muted"><code>{{ d.domainURI }}</code></div>
+              <div class="admin-muted"><code>{{ d.domainURI }}</code></div>
             </td>
             <td>{{ d.domainSort ?? 0 }} / {{ d.domainNav === 1 ? '导航显示' : '隐藏' }}</td>
             <td>
@@ -245,32 +246,32 @@ onMounted(async () => {
                   <button class="chip-x" type="button" @click="handleUnbindTag(d, t.tagId)">×</button>
                 </span>
               </div>
-              <div class="filter-row" style="margin-top: 0.35rem;">
-                <input v-model="bindTagMap[d.oId]" class="input" placeholder="输入标签名绑定" />
-                <button class="btn btn-sm" @click="handleBindTag(d)">绑定</button>
+              <div class="admin-filter-bar" style="margin-top: 0.35rem;">
+                <input aria-label="输入标签名绑定" v-model="bindTagMap[d.oId]" class="admin-input" placeholder="输入标签名绑定" />
+                <button class="admin-btn admin-btn--sm" @click="handleBindTag(d)">绑定</button>
               </div>
             </td>
             <td>
               <div class="btn-row">
-                <button class="btn btn-sm" @click="editDomain(d)">编辑</button>
-                <button class="btn btn-sm btn-danger" :disabled="busy" @click="handleRemoveDomain(d)">删除</button>
+                <button class="admin-btn admin-btn--sm" @click="editDomain(d)">编辑</button>
+                <button class="admin-btn admin-btn--sm admin-btn--danger" :disabled="busy" @click="handleRemoveDomain(d)">删除</button>
               </div>
             </td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
     </div>
 
     <div v-else-if="canTags">
-      <div class="filter-row toolbar-gap">
-        <input v-model="newTagTitle" class="input" placeholder="新标签名称" />
-        <button class="btn btn-primary" :disabled="busy" @click="handleAddTag">新增标签</button>
-        <input v-model="tagKeyword" class="input" placeholder="搜索标签" @keyup.enter="loadTags(1)" />
-        <button class="btn btn-secondary" @click="loadTags(1)">检索</button>
-        <button class="btn btn-danger" :disabled="busy" @click="handleRemoveUnused">清理未使用标签</button>
+      <div class="admin-filter-bar toolbar-gap admin-search-bar">
+        <input aria-label="新标签名称" v-model="newTagTitle" class="admin-input" placeholder="新标签名称" />
+        <button class="admin-btn admin-btn--primary" :disabled="busy" @click="handleAddTag">新增标签</button>
+        <input aria-label="搜索标签" v-model="tagKeyword" class="admin-input" placeholder="搜索标签" @keyup.enter="loadTags(1)" />
+        <button class="admin-btn admin-btn--secondary" @click="loadTags(1)">检索</button>
+        <button class="admin-btn admin-btn--danger" :disabled="busy" @click="handleRemoveUnused">清理未使用标签</button>
       </div>
 
-      <table class="data-table">
+      <div class="admin-table-wrap"><table class="admin-table">
         <thead>
           <tr>
             <th>标签名称</th>
@@ -287,31 +288,28 @@ onMounted(async () => {
             <td>{{ t.tagReferenceCount ?? 0 }}</td>
             <td>{{ t.tagStatus === 0 ? '正常' : '停用' }}</td>
             <td>
-              <button class="btn btn-sm" :disabled="busy" @click="handleToggleTagStatus(t)">
+              <button class="admin-btn admin-btn--sm" :disabled="busy" @click="handleToggleTagStatus(t)">
                 {{ t.tagStatus === 0 ? '停用' : '启用' }}
               </button>
             </td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
 
       <div class="pager-bar">
-        <button class="btn btn-sm" :disabled="tagPagination.page <= 1" @click="loadTags(tagPagination.page - 1)">上一页</button>
+        <button class="admin-btn admin-btn--sm" :disabled="tagPagination.page <= 1" @click="loadTags(tagPagination.page - 1)">上一页</button>
         <span>第 {{ tagPagination.page }} / {{ tagPagination.totalPages }} 页（共 {{ tagPagination.total }} 条）</span>
-        <button class="btn btn-sm" :disabled="tagPagination.page >= tagPagination.totalPages" @click="loadTags(tagPagination.page + 1)">下一页</button>
+        <button class="admin-btn admin-btn--sm" :disabled="tagPagination.page >= tagPagination.totalPages" @click="loadTags(tagPagination.page + 1)">下一页</button>
       </div>
     </div>
-  </section>
+      </section>
+  </div>
 </template>
 
 <style scoped>
-.panel-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
-.tab-row, .filter-row, .btn-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 .toolbar-gap { margin-bottom: 0.75rem; }
 .num-input { width: 88px; }
 .tag-pills { display: flex; gap: 0.35rem; flex-wrap: wrap; }
-.tag-chip { display: inline-flex; align-items: center; gap: 0.25rem; background: #f1f5f9; padding: 0.15rem 0.45rem; border-radius: 999px; font-size: 0.8rem; }
-.chip-x { border: 0; background: transparent; cursor: pointer; font-weight: 700; }
-.pager-bar { display: flex; gap: 0.75rem; align-items: center; margin-top: 0.75rem; }
-.notice-banner { padding: 0.5rem 0.75rem; border-radius: 6px; background: #eff6ff; color: #1d4ed8; margin-bottom: 0.75rem; }
+.tag-chip { display: inline-flex; align-items: center; gap: 0.25rem; background: var(--fp-elevated); color: var(--fp-text); padding: 0.15rem 0.45rem; border-radius: 999px; font-size: 0.8rem; }
+.chip-x { border: 0; background: transparent; color: inherit; cursor: pointer; font-weight: 700; }
 </style>

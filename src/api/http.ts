@@ -277,7 +277,13 @@ export async function request<T = ApiEnvelope<unknown>>(
       throw new ApiError(parsed.message, res.status, parsed.code, parsed.requestId, isUnknown)
     }
 
-    const json = (await res.json()) as ApiEnvelope<unknown>
+    let json: ApiEnvelope<unknown>
+    try {
+      json = await res.json()
+      if (!json || typeof json !== 'object' || typeof json.code !== 'number') throw new Error('invalid envelope')
+    } catch {
+      throw new ApiError('响应中断或格式异常，请恢复原操作确认结果', 502, 'invalid_response', undefined, idempotentWrite)
+    }
     if (startVersion !== authContextVersion) {
       throw new ApiError('登录账号或会话已切换，已丢弃过期响应', 401, 'stale_session')
     }
@@ -298,7 +304,7 @@ export async function request<T = ApiEnvelope<unknown>>(
 export async function requestData<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const res = await request<ApiEnvelope<T>>(path, options)
   if (res.data === undefined) {
-    throw new ApiError('响应缺少数据载荷', 502, 'invalid_response', res.requestId)
+    throw new ApiError('响应缺少数据载荷', 502, 'invalid_response', res.requestId, Boolean(options.idempotentWrite))
   }
   return res.data
 }

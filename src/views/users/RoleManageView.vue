@@ -7,9 +7,11 @@ import {
   removeRole,
   updateRolePermissions,
   type AdminRoleItem,
+  type Stage3Pagination,
   type RolePermissionItem,
 } from '@/api/admin'
 import { ApiError, createIdempotencyKey } from '@/api/http'
+import AdminPagination from '@/components/common/AdminPagination.vue'
 import PageStateView, { type PageViewState } from '@/components/common/PageStateView.vue'
 
 /**
@@ -20,6 +22,7 @@ import PageStateView, { type PageViewState } from '@/components/common/PageState
 const viewState = ref<PageViewState>('loading')
 const errorMsg = ref('')
 const roles = ref<AdminRoleItem[]>([])
+const pagination = ref<Stage3Pagination>({page:1,pageSize:50,total:0,totalPages:1})
 const canManageAdminPerms = ref(false)
 const selectedRole = ref<AdminRoleItem | null>(null)
 const permissions = ref<RolePermissionItem[]>([])
@@ -48,11 +51,12 @@ const isRoleMatrixLocked = computed(() => {
   return selectedRole.value.oId === 'adminRole' || selectedRole.value.oId === '1630552921050'
 })
 
-async function loadRoles() {
+async function loadRoles(targetPage = pagination.value.page) {
   viewState.value = 'loading'
   errorMsg.value = ''
   try {
-    const res = await fetchRoles(1, 100)
+    const res = await fetchRoles(targetPage, 50)
+    pagination.value = res.pagination
     roles.value = res.items
     canManageAdminPerms.value = res.canManageAdminPerms
     viewState.value = res.items.length === 0 ? 'empty' : 'ready'
@@ -158,25 +162,26 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="panel-card">
-    <div class="panel-head">
+  <div class="admin-page">
+    <div class="admin-page__header">
       <div>
         <h2>角色权限配置</h2>
-        <p class="muted">维护系统角色与精细化权限矩阵；内置角色及绑定用户的角色受删除保护。</p>
+        <p class="admin-muted">维护系统角色与精细化权限矩阵；内置角色及绑定用户的角色受删除保护。</p>
       </div>
-      <form class="filter-row" @submit.prevent="handleCreateRole">
-        <input v-model="newRoleName" class="input" placeholder="新角色名称" required />
-        <input v-model="newRoleDesc" class="input" placeholder="角色描述（可选）" />
-        <button class="btn btn-primary" type="submit" :disabled="saving">新增角色</button>
+      <form class="admin-filter-bar" @submit.prevent="handleCreateRole">
+        <label class="admin-field"><input aria-label="新角色名称" v-model="newRoleName" class="admin-input" placeholder="新角色名称" required /></label>
+        <label class="admin-field"><input aria-label="角色描述（可选）" v-model="newRoleDesc" class="admin-input" placeholder="角色描述（可选）" /></label>
+        <button class="admin-btn admin-btn--primary" type="submit" :disabled="saving">新增角色</button>
       </form>
     </div>
+    <section class="admin-panel">
 
     <p v-if="toast" class="notice-banner">{{ toast }}</p>
 
     <PageStateView :state="viewState" :error-message="errorMsg" empty-text="暂无角色" @retry="loadRoles">
       <div class="split-layout">
-        <div class="table-wrap">
-          <table class="data-table">
+        <div class="admin-table-wrap">
+          <table class="admin-table">
             <thead>
               <tr>
                 <th>角色名</th>
@@ -188,17 +193,17 @@ onMounted(() => {
             <tbody>
               <tr v-for="role in roles" :key="role.oId" :class="{ 'row-active': selectedRole?.oId === role.oId }">
                 <td>
-                  <strong>{{ role.roleName }}</strong>
-                  <div class="muted">{{ role.roleDescription || role.oId }}</div>
+                  <button type="button" class="admin-btn admin-btn--link" :aria-pressed="selectedRole?.oId === role.oId" @click="selectRole(role)">{{ role.roleName }}</button>
+                  <div class="admin-muted">{{ role.roleDescription || role.oId }}</div>
                 </td>
                 <td>{{ role.userCount }}</td>
                 <td>{{ role.builtIn ? '内置' : '自定义' }}</td>
                 <td>
                   <div class="btn-row">
-                    <button class="btn btn-sm" type="button" @click="selectRole(role)">配置权限</button>
+                    <button class="admin-btn admin-btn--sm" type="button" @click="selectRole(role)">配置权限</button>
                     <button
                       v-if="role.removable"
-                      class="btn btn-sm btn-danger"
+                      class="admin-btn admin-btn--sm admin-btn--danger"
                       type="button"
                       :disabled="saving"
                       @click="handleRemoveRole(role)"
@@ -217,10 +222,10 @@ onMounted(() => {
             <div class="pane-head">
               <div>
                 <h3>{{ selectedRole.roleName }} 权限矩阵</h3>
-                <p class="muted">已勾选 {{ grantedSet.size }} 项权限</p>
+                <p class="admin-muted">已勾选 {{ grantedSet.size }} 项权限</p>
               </div>
               <button
-                class="btn btn-primary"
+                class="admin-btn admin-btn--primary"
                 type="button"
                 :disabled="saving || permsLoading || isRoleMatrixLocked"
                 @click="handleSavePermissions"
@@ -228,42 +233,46 @@ onMounted(() => {
                 保存权限
               </button>
             </div>
-            <p v-if="isRoleMatrixLocked" class="muted">当前账号无权修改管理员或 OP 核心角色权限。</p>
-            <div v-if="permsLoading" class="muted">加载权限矩阵中...</div>
+            <p v-if="isRoleMatrixLocked" class="admin-muted">当前账号无权修改管理员或 OP 核心角色权限。</p>
+            <div v-if="permsLoading" class="admin-muted">加载权限矩阵中...</div>
             <div v-else class="perm-groups">
               <div v-for="[cat, list] in groupedPermissions" :key="cat" class="perm-group">
                 <h4>{{ cat }}</h4>
-                <label v-for="perm in list" :key="perm.oId" class="perm-item">
+                <label v-for="perm in list" :key="perm.oId" class="perm-item admin-choice">
                   <input
                     type="checkbox"
                     :checked="grantedSet.has(perm.oId)"
                     :disabled="isRoleMatrixLocked || (!canManageAdminPerms && perm.adminOnly)"
                     @change="togglePerm(perm.oId)"
                   />
-                  <span>{{ perm.permissionLabel }}</span>
-                  <code class="muted">{{ perm.oId }}</code>
+                  <span class="perm-content"><span>{{ perm.permissionLabel }}</span><code class="admin-muted">{{ perm.oId }}</code></span>
                 </label>
               </div>
             </div>
           </template>
-          <p v-else class="muted">请在左侧选择一个角色查看并编辑其权限矩阵。</p>
+          <p v-else class="admin-muted">请点击角色名称或“配置权限”查看并编辑权限矩阵。</p>
         </aside>
       </div>
     </PageStateView>
-  </section>
+    <AdminPagination v-if="viewState === 'ready'" :page="pagination.page" :page-size="pagination.pageSize" :total="pagination.total" :page-count="pagination.totalPages" :disabled="saving" @update:page="loadRoles" />
+      </section>
+  </div>
 </template>
 
 <style scoped>
-.panel-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
-.filter-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-.split-layout { display: grid; grid-template-columns: 1fr 1.3fr; gap: 1rem; align-items: start; }
-.detail-pane { border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 1rem; }
+.split-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 1rem; align-items: start; }
+.detail-pane { border: 1px solid var(--fp-border); border-radius: 8px; padding: 1rem; }
 .pane-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
 .perm-groups { display: flex; flex-direction: column; gap: 0.75rem; max-height: 600px; overflow-y: auto; }
 .perm-group h4 { margin: 0 0 0.35rem; font-size: 0.9rem; }
-.perm-item { display: flex; gap: 0.5rem; align-items: center; font-size: 0.85rem; padding: 0.2rem 0; }
+.perm-item { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; align-items: start; min-height: 44px; padding: 10px 0; font-size: 13px; cursor: pointer; border-bottom: 1px solid var(--fp-border); }
+.perm-item input { margin-top: 2px; }
+.perm-content { display: grid; min-width: 0; gap: 4px; overflow-wrap: anywhere; }
+.perm-content code { white-space: normal; font-size: 11px; }
+.perm-item:has(input:disabled) { color: var(--fp-muted); cursor: not-allowed; }
+.perm-group { min-width: 0; }
+@media (max-width: 768px) { .perm-groups { max-height: none; overflow: visible; } }
 .btn-row { display: flex; gap: 0.4rem; }
-.notice-banner { padding: 0.5rem 0.75rem; border-radius: 6px; background: #eff6ff; color: #1d4ed8; margin-bottom: 0.75rem; }
 .row-active { background: rgba(59, 130, 246, 0.08); }
 @media (max-width: 960px) { .split-layout { grid-template-columns: 1fr; } }
 </style>

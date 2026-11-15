@@ -772,7 +772,7 @@ onMounted(() => {
         <section v-else class="admin-panel">
           <h2 class="ud-card-title">与该用户相关的近期管理记录</h2>
           <div v-if="detail.recentOperations.length" class="admin-table-wrap">
-            <table class="admin-table" :class="{ 'admin-table--compact': theme.compactTable }">
+            <table class="admin-table admin-table--wide" :class="{ 'admin-table--compact': theme.compactTable }">
               <thead>
                 <tr>
                   <th>操作时间</th>

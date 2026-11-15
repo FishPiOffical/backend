@@ -539,18 +539,18 @@ onMounted(() => {
       </div>
 
       <form class="admin-filters" @submit.prevent="submitSearch">
-        <input
+        <label class="admin-field"><input aria-label="所属文章 ID"
           v-model="articleIdInput"
           type="search"
           class="admin-input cm-article-input"
           placeholder="所属文章 ID（可选）..."
-        />
-        <input
+        /></label>
+        <label class="admin-field"><input aria-label="搜索关键词"
           v-model="keywordInput"
           type="search"
           class="admin-input cm-keyword-input"
           placeholder="搜索评论 ID、正文或作者用户名..."
-        />
+        /></label>
         <button type="submit" class="admin-btn admin-btn--primary" :disabled="loading">搜索</button>
         <button v-if="hasActiveFilter" type="button" class="admin-btn" @click="resetFilters">清空</button>
       </form>
@@ -567,7 +567,7 @@ onMounted(() => {
       @go-home="goHome"
     >
       <div class="admin-table-wrap">
-        <table class="admin-table" :class="{ 'admin-table--compact': theme.compactTable }">
+        <table class="admin-table admin-table--wide" :class="{ 'admin-table--compact': theme.compactTable }">
           <thead>
             <tr>
               <th>评论内容摘要（纯文本）</th>
@@ -979,7 +979,7 @@ onMounted(() => {
 .cm-toolbar {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 12px 16px;
 }

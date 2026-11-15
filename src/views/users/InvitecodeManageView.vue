@@ -101,34 +101,35 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="panel-card">
-    <div class="panel-head">
+  <div class="admin-page">
+    <div class="admin-page__header">
       <div>
         <h2>邀请码管理</h2>
-        <p class="muted">支持批量生成邀请码及维护状态（0 已使用、1 未使用、2 已停用）与备注。</p>
+        <p class="admin-muted">支持批量生成邀请码及维护状态（0 已使用、1 未使用、2 已停用）与备注。</p>
       </div>
-      <form class="filter-row" @submit.prevent="handleGenerate">
-        <input v-model.number="genQuantity" class="input num-input" type="number" min="1" max="100" />
-        <input v-model="genMemo" class="input" placeholder="生成备注（可选）" />
-        <button class="btn btn-primary" type="submit" :disabled="saving">批量生成</button>
+      <form class="admin-filter-bar" @submit.prevent="handleGenerate">
+        <input aria-label="生成数量" v-model.number="genQuantity" class="admin-input num-input" type="number" min="1" max="100" />
+        <label class="admin-field"><input aria-label="生成备注（可选）" v-model="genMemo" class="admin-input" placeholder="生成备注（可选）" /></label>
+        <button class="admin-btn admin-btn--primary" type="submit" :disabled="saving">批量生成</button>
       </form>
     </div>
+    <section class="admin-panel">
 
-    <div class="filter-row toolbar-gap">
-      <select v-model="statusFilter" class="input" @change="load(1)">
+    <div class="admin-filter-bar toolbar-gap admin-search-bar">
+      <select aria-label="状态筛选" v-model="statusFilter" class="admin-select" @change="load(1)">
         <option value="all">全部状态</option>
         <option value="1">1 - 未使用</option>
         <option value="0">0 - 已使用</option>
         <option value="2">2 - 已停用</option>
       </select>
-      <input v-model="keyword" class="input" placeholder="邀请码或备注" @keyup.enter="load(1)" />
-      <button class="btn btn-secondary" type="button" @click="load(1)">筛选</button>
+      <input aria-label="邀请码或备注" v-model="keyword" class="admin-input" placeholder="邀请码或备注" @keyup.enter="load(1)" />
+      <button class="admin-btn admin-btn--secondary" type="button" @click="load(1)">筛选</button>
     </div>
 
     <p v-if="toast" class="notice-banner">{{ toast }}</p>
 
     <PageStateView :state="viewState" :error-message="errorMsg" empty-text="暂无符合条件的邀请码" @retry="load(pagination.page)">
-      <table class="data-table">
+      <div class="admin-table-wrap"><table class="admin-table admin-table--wide">
         <thead>
           <tr>
             <th>邀请码</th>
@@ -143,7 +144,7 @@ onMounted(() => {
           <tr v-for="row in items" :key="row.oId">
             <td><code>{{ row.code }}</code></td>
             <td>
-              <select v-if="editingId === row.oId" v-model.number="editStatus" class="input">
+              <select aria-label="邀请码状态" v-if="editingId === row.oId" v-model.number="editStatus" class="admin-select">
                 <option :value="1">1 - 未使用</option>
                 <option :value="0">0 - 已使用</option>
                 <option :value="2">2 - 已停用</option>
@@ -151,43 +152,40 @@ onMounted(() => {
               <span v-else>{{ row.status }} - {{ row.statusLabel }}</span>
             </td>
             <td>
-              <input v-if="editingId === row.oId" v-model="editMemo" class="input" />
+              <input aria-label="邀请码备注" v-if="editingId === row.oId" v-model="editMemo" class="admin-input" />
               <span v-else>{{ row.memo || '-' }}</span>
             </td>
             <td>
               <div>生成：{{ row.generatorName || '-' }}</div>
-              <div class="muted">使用：{{ row.userName || '-' }}</div>
+              <div class="admin-muted">使用：{{ row.userName || '-' }}</div>
             </td>
             <td>
-              <div>{{ row.time ? formatDateTime(row.time) : '-' }}</div>
-              <div v-if="row.useTime" class="muted">用：{{ formatDateTime(row.useTime) }}</div>
+              <div>{{ row.time ? formatDateTime(row.time) : '未记录' }}</div>
+              <div v-if="row.useTime" class="admin-muted">用：{{ formatDateTime(row.useTime) }}</div>
             </td>
             <td>
               <div v-if="editingId === row.oId" class="btn-row">
-                <button class="btn btn-sm btn-primary" :disabled="saving" @click="saveEdit(row)">保存</button>
-                <button class="btn btn-sm" @click="editingId = ''">取消</button>
+                <button class="admin-btn admin-btn--sm admin-btn--primary" :disabled="saving" @click="saveEdit(row)">保存</button>
+                <button class="admin-btn admin-btn--sm" @click="editingId = ''">取消</button>
               </div>
-              <button v-else class="btn btn-sm" @click="startEdit(row)">编辑</button>
+              <button v-else class="admin-btn admin-btn--sm" @click="startEdit(row)">编辑</button>
             </td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
 
       <div class="pager-bar">
-        <button class="btn btn-sm" :disabled="pagination.page <= 1" @click="load(pagination.page - 1)">上一页</button>
+        <button class="admin-btn admin-btn--sm" :disabled="pagination.page <= 1" @click="load(pagination.page - 1)">上一页</button>
         <span>第 {{ pagination.page }} / {{ pagination.totalPages }} 页（共 {{ pagination.total }} 条）</span>
-        <button class="btn btn-sm" :disabled="pagination.page >= pagination.totalPages" @click="load(pagination.page + 1)">下一页</button>
+        <button class="admin-btn admin-btn--sm" :disabled="pagination.page >= pagination.totalPages" @click="load(pagination.page + 1)">下一页</button>
       </div>
     </PageStateView>
-  </section>
+      </section>
+  </div>
 </template>
 
 <style scoped>
-.panel-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
-.filter-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 .toolbar-gap { margin-bottom: 0.75rem; }
 .num-input { width: 90px; }
 .btn-row { display: flex; gap: 0.4rem; }
-.pager-bar { display: flex; gap: 0.75rem; align-items: center; margin-top: 0.75rem; }
-.notice-banner { padding: 0.5rem 0.75rem; border-radius: 6px; background: #eff6ff; color: #1d4ed8; margin-bottom: 0.75rem; }
 </style>

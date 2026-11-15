@@ -333,7 +333,7 @@ onMounted(() => {
           </div>
 
           <div v-if="dashboard.recentOperations.length" class="admin-table-wrap">
-            <table class="admin-table" :class="{ 'admin-table--compact': theme.compactTable }">
+            <table class="admin-table admin-table--wide" :class="{ 'admin-table--compact': theme.compactTable }">
               <thead>
                 <tr>
                   <th>操作时间</th>

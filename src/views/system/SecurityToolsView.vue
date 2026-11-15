@@ -197,7 +197,7 @@ onMounted(loadMonitor)
           </div>
         </header>
 
-        <div class="admin-filter-bar" style="margin: 0">
+        <div class="admin-filter-bar admin-search-bar" style="margin: 0">
           <label class="admin-row">
             <span class="admin-muted">爬虫分组</span>
             <select v-model="crawlerFilter" class="admin-select" style="width: auto; min-width: 180px">
@@ -211,13 +211,13 @@ onMounted(loadMonitor)
         </div>
 
         <div v-if="monitorData?.switches" class="admin-panel admin-panel--subtle admin-row" style="padding: 12px 16px; gap: 16px">
-          <label class="admin-row" style="gap: 6px"><input v-model="switchesDraft.firewallEnabled" type="checkbox" :disabled="!monitorData.switches.editable" /> CC 防火墙</label>
+          <label class="admin-row admin-choice" style="gap: 6px"><input v-model="switchesDraft.firewallEnabled" type="checkbox" :disabled="!monitorData.switches.editable" /> CC 防火墙</label>
           <label class="admin-row" style="gap: 6px">
             阈值(次/分)
             <input v-model.number="switchesDraft.threshold" type="number" min="1" class="admin-input" style="width: 100px" :disabled="!monitorData.switches.editable" />
           </label>
-          <label class="admin-row" style="gap: 6px"><input v-model="switchesDraft.verificationEnabled" type="checkbox" :disabled="!monitorData.switches.editable" /> 匿名验证盾</label>
-          <label class="admin-row" style="gap: 6px"><input v-model="switchesDraft.firstVisitCaptchaEnabled" type="checkbox" :disabled="!monitorData.switches.editable" /> 首访验证码</label>
+          <label class="admin-row admin-choice" style="gap: 6px"><input v-model="switchesDraft.verificationEnabled" type="checkbox" :disabled="!monitorData.switches.editable" /> 匿名验证盾</label>
+          <label class="admin-row admin-choice" style="gap: 6px"><input v-model="switchesDraft.firstVisitCaptchaEnabled" type="checkbox" :disabled="!monitorData.switches.editable" /> 首访验证码</label>
           <button
             type="button"
             class="admin-btn admin-btn--primary admin-btn--sm"
@@ -237,7 +237,7 @@ onMounted(loadMonitor)
         <template v-if="monitorData">
           <div class="security-metrics"><div><strong>{{ monitorData.total ?? 0 }}</strong><span>累计事件</span></div><div><strong>{{ monitorData.last10Minutes ?? 0 }}</strong><span>最近 10 分钟</span></div><div><strong class="retention-text">{{ monitorData.retention ?? '—' }}</strong><span>内存保留上限</span></div><div><strong>{{ monitorData.observationDiscarded ?? 0 }}</strong><span>丢弃的链路观测</span></div></div>
           <div class="security-block"><h3>事件类型统计</h3><RecordTable :rows="counters" :columns="[['name','事件类型'],['count','数量']]" /></div>
-          <div class="security-block"><h3>请求事件</h3><div class="admin-filter-bar"><input v-model="eventFilter" class="admin-input" placeholder="筛选当前快照的 IP、路径、原因" aria-label="事件关键词" /><select v-model="eventResult" class="admin-select" aria-label="事件结果"><option value="">全部结果</option><option v-for="result in eventResults" :key="result">{{ result }}</option></select><span>{{ events.length }} 条</span></div><RecordTable :rows="events" :columns="[['time','时间'],['ip','来源 IP'],['userStatus','用户状态'],['method','方法'],['uri','路径'],['handler','处理器'],['flow','流程'],['type','类型'],['result','结果'],['reason','原因']]" /></div>
+          <div class="security-block"><h3>请求事件</h3><div class="admin-filter-bar admin-search-bar"><input v-model="eventFilter" class="admin-input" placeholder="筛选当前快照的 IP、路径、原因" aria-label="事件关键词" /><select v-model="eventResult" class="admin-select" aria-label="事件结果"><option value="">全部结果</option><option v-for="result in eventResults" :key="result">{{ result }}</option></select><span>{{ events.length }} 条</span></div><RecordTable :rows="events" :columns="[['time','时间'],['ip','来源 IP'],['userStatus','用户状态'],['method','方法'],['uri','路径'],['handler','处理器'],['flow','流程'],['type','类型'],['result','结果'],['reason','原因']]" /></div>
           <div class="security-block"><h3>链路观测</h3><RecordTable :rows="rows(monitorData.observations)" :columns="[['time','时间'],['ip','来源 IP'],['kind','类型'],['state','状态'],['detail','详情'],['failure','失败信息']]" /></div>
           <div class="security-block"><h3>爬虫分组</h3><p class="admin-muted">未验证表示尚未完成可信身份验证，不等同于伪造爬虫。统计随服务重启重置，省略记录数不代表请求总数。</p><RecordTable :rows="rows(monitorData.crawlers?.groups)" :columns="[['name','分组'],['verified','已验证'],['count','请求数'],['lastSeen','最近出现'],['pathCount','路径数'],['omitted','省略路径'],['sourceCount','来源数'],['sourceOmitted','省略来源']]" /></div>
           <div class="security-block"><h3>访问路径 · {{ monitorData.crawlers?.selectedGroup || '默认分组' }}</h3><RecordTable :rows="rows(monitorData.crawlers?.paths)" :columns="[['path','路径'],['count','次数'],['lastSeen','最近访问']]" /></div>
@@ -255,7 +255,7 @@ onMounted(loadMonitor)
         </header>
         <div class="admin-row">
           <template v-if="canReindexOne">
-            <input v-model="articleIdInput" class="admin-input" style="max-width: 280px" placeholder="输入文章 oId" />
+            <input aria-label="输入文章 oId" v-model="articleIdInput" class="admin-input" placeholder="输入文章 oId" />
             <button type="button" class="admin-btn admin-btn--primary" :disabled="busy" @click="handleReindexOne">重建单篇索引</button>
           </template>
           <button v-if="canReindexAll" type="button" class="admin-btn admin-btn--danger" :disabled="busy" @click="handleReindexAll">

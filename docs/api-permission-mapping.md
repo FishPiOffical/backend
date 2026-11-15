@@ -196,3 +196,22 @@
 | 领域、导航与标签 | `/ops/domains-tags` | `/api/v3/admin/domains*`、`/api/v3/admin/tags*` | `domainManage` / `tagManage` |
 | 保留词与广告位 | `/ops/reserved-ad` | `/api/v3/admin/reserved-words*`、`/api/v3/admin/ads` | `reservedWordManage` / `adManage` |
 | 鱼游与大事记维护 | `/ops/community-records` | `/api/v3/admin/fish-games*`、`/api/v3/admin/milestones*` | `fishGameManage` / `milestoneManage` |
+
+
+## 当前实施与恢复状态 2026 年 11 月 15 日
+
+上表保留最初分期契约，其中第三、四阶段的“待新增”表示规划时状态。当前对应管理 Processor 已实现并注册；运行及权限验收需逐项记录，不以路由存在作为通过依据。
+
+资产模块新增统一原操作恢复入口：请求结果未知时在内存保留原路径、方法、正文及 Idempotency-Key，拒绝新的资产写入；恢复始终重放原请求，由后端重新鉴权。同身份令牌刷新保留任务，退出或身份变化清除。恢复回执用于确认原操作，当前业务状态仍需重新读取。实现与剩余验收见《管理后台开发规划》第 12 节。
+
+### 2026-11-15 配置编辑与结构化监控
+
+- 职业工作台已接入 `definition/metadata`、`automation/metadata` 和三类 `*/draft`；现有版本作为编辑来源，保存后另行发布。补齐方案回滚与自动化生命周期入口。复杂配置使用递归字段表单，仍以服务端校验为准。
+- VIP 套餐字段以 MembershipLevel 的 `lvName / lvCode / price / durationType / durationValue / benefits` 为准；用户权益使用 `configJson`。Rhythm V3 白名单同步补齐，需重新编译后验收。
+- 安全监控按快照字段分表展示，爬虫筛选传递精确分组 key；安全操作员权限及生产只读约束不变。
+- 实施与验收证据、保护检查既有失败及剩余事项见《管理后台开发规划.md》第 13 节。
+
+
+### 角色／邀请码真实读取补修
+
+角色列表遵守 size 最大 50，并显示 pagination。邀请码旧模型没有生成时间列，V3 不查询 time；兼容响应 time=0，界面显示未记录。已通过本地 3319 真实管理员页面只读验证角色列表及邀请码空列表，不涉及生成／权限写入。

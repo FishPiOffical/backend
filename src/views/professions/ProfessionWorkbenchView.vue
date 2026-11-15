@@ -259,9 +259,9 @@ onMounted(() => loadCatalog(1))
       <div v-if="notice" class="admin-alert admin-alert--success">{{ notice }}</div>
       <div v-if="actionError" class="admin-alert admin-alert--danger">{{ actionError }}</div>
 
-      <div class="admin-filter-bar" style="margin: 0">
-        <input v-model="keyword" class="admin-input" placeholder="关键词（名称/编码）" @keyup.enter="loadCatalog(1)" />
-        <select v-model="statusFilter" class="admin-select">
+      <div class="admin-filter-bar admin-search-bar" style="margin: 0">
+        <input aria-label="关键词（名称/编码）" v-model="keyword" class="admin-input" placeholder="关键词（名称/编码）" @keyup.enter="loadCatalog(1)" />
+        <select aria-label="状态筛选" v-model="statusFilter" class="admin-select">
           <option value="">全部状态</option>
           <option value="PUBLISHED">已发布</option>
           <option value="DRAFT">草稿</option>
@@ -278,7 +278,7 @@ onMounted(() => loadCatalog(1))
         @retry="loadCatalog(page)"
       >
         <div class="admin-table-wrap">
-          <table class="admin-table">
+          <table class="admin-table admin-table--wide">
             <thead>
               <tr>
                 <th>ID</th>
@@ -410,7 +410,7 @@ onMounted(() => loadCatalog(1))
       <div class="admin-grid-auto">
         <div class="admin-field">
           <label class="admin-field__label">配置 JSON（必须先预检再导入）</label>
-          <textarea v-model="configJsonInput" class="admin-textarea admin-mono" rows="8" placeholder="粘贴职业配置 JSON" />
+          <label class="admin-field"><textarea aria-label="粘贴职业配置 JSON" v-model="configJsonInput" class="admin-textarea admin-mono" rows="8" placeholder="粘贴职业配置 JSON" /></label>
           <div class="admin-row">
             <button type="button" class="admin-btn" @click="handlePrecheck">1. 导入预检</button>
             <button type="button" class="admin-btn admin-btn--primary" :disabled="!precheckResult?.valid || (Array.isArray(precheckResult.conflicts) && precheckResult.conflicts.length > 0) || writeBusy || writeUncertain" @click="handleImport">2. 确认导入</button>
@@ -421,7 +421,7 @@ onMounted(() => loadCatalog(1))
         <div class="admin-stack">
           <div class="admin-field">
             <label class="admin-field__label">目录排序（按顺序填写职业 ID）</label>
-            <textarea v-model="reorderIdsInput" class="admin-textarea" rows="3" placeholder="每行或逗号分隔一个 professionId" />
+            <label class="admin-field"><textarea aria-label="每行或逗号分隔一个 professionId" v-model="reorderIdsInput" class="admin-textarea" rows="3" placeholder="每行或逗号分隔一个 professionId" /></label>
             <div>
               <button type="button" class="admin-btn" @click="handleReorder">保存排序</button>
             </div>
@@ -429,8 +429,8 @@ onMounted(() => loadCatalog(1))
 
           <div class="admin-field">
             <label class="admin-field__label">自动化规则模拟测试</label>
-            <textarea v-model="testConfigJson" class="admin-textarea admin-mono" rows="3" placeholder="configurationJson" />
-            <textarea v-model="testPayloadJson" class="admin-textarea admin-mono" rows="2" placeholder="payloadJson" />
+            <label class="admin-field"><textarea aria-label="configurationJson" v-model="testConfigJson" class="admin-textarea admin-mono" rows="3" placeholder="configurationJson" /></label>
+            <label class="admin-field"><textarea aria-label="payloadJson" v-model="testPayloadJson" class="admin-textarea admin-mono" rows="2" placeholder="payloadJson" /></label>
             <div>
               <button type="button" class="admin-btn" @click="handleTestAutomation">运行模拟</button>
             </div>

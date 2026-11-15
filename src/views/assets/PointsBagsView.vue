@@ -142,13 +142,14 @@ async function executeConfirmed() {
 </script>
 
 <template>
-  <section class="panel-card">
-    <div class="panel-head">
+  <div class="admin-page">
+    <div class="admin-page__header">
       <div>
         <h2>积分、工资与背包调整</h2>
-        <p class="muted">受严格事务与幂等键保护；所有资金与道具变动均在确认摘要后执行。</p>
+        <p class="admin-muted">受严格事务与幂等键保护；所有资金与道具变动均在确认摘要后执行。</p>
       </div>
     </div>
+    <section class="admin-panel">
 
     <p v-if="toast" class="notice-banner">{{ toast }}</p>
 
@@ -156,47 +157,47 @@ async function executeConfirmed() {
       <div class="sub-card">
         <h3>积分操作</h3>
         <div class="form-grid">
-          <input v-model="target" class="input" placeholder="目标用户名或 ID" />
-          <select v-model="pointAction" class="input">
+          <label class="admin-field"><input aria-label="目标用户名或 ID" v-model="target" class="admin-input" placeholder="目标用户名或 ID" /></label>
+          <select aria-label="积分操作" v-model="pointAction" class="admin-select">
             <option v-if="canPointAdd" value="charge">充值积分</option>
             <option v-if="canPointDeduct" value="deduct">扣除违规积分</option>
             <option v-if="canPointAdd" value="init">补发初始积分</option>
             <option v-if="canPointExchange" value="exchange">积分兑换扣减</option>
           </select>
-          <select v-if="pointAction === 'charge'" v-model="chargeMode" class="input">
+          <select aria-label="充值方式" v-if="pointAction === 'charge'" v-model="chargeMode" class="admin-select">
             <option value="direct">direct（直接增加积分）</option>
             <option value="sponsor">sponsor（RMB 金额 × 80 折算）</option>
           </select>
-          <input v-model.number="pointAmount" class="input" type="number" min="1" placeholder="数量" />
-          <input v-model="pointMemo" class="input" placeholder="备注说明" />
-          <button class="btn btn-primary" type="button" @click="openPointConfirm">核对摘要并提交</button>
+          <label class="admin-field"><input aria-label="数量" v-model.number="pointAmount" class="admin-input" type="number" min="1" placeholder="数量" /></label>
+          <label class="admin-field"><input aria-label="备注说明" v-model="pointMemo" class="admin-input" placeholder="备注说明" /></label>
+          <button class="admin-btn admin-btn--primary" type="button" @click="openPointConfirm">核对摘要并提交</button>
         </div>
       </div>
 
       <div v-if="canBagAdjust" class="sub-card">
         <h3>背包道具调整</h3>
         <div class="form-grid">
-          <input v-model="target" class="input" placeholder="目标用户名或 ID" />
-          <input v-model="bagItem" class="input" placeholder="道具 ID / 标识" />
-          <input v-model.number="bagNumber" class="input" type="number" placeholder="增减数量（正增负减）" />
-          <input v-model.number="bagMaxTake" class="input" type="number" min="0" placeholder="携带上限" />
-          <button class="btn btn-primary" type="button" @click="openBagConfirm">核对摘要并调整</button>
+          <label class="admin-field"><input aria-label="目标用户名或 ID" v-model="target" class="admin-input" placeholder="目标用户名或 ID" /></label>
+          <label class="admin-field"><input aria-label="道具 ID / 标识" v-model="bagItem" class="admin-input" placeholder="道具 ID / 标识" /></label>
+          <label class="admin-field"><input aria-label="增减数量（正增负减）" v-model.number="bagNumber" class="admin-input" type="number" placeholder="增减数量（正增负减）" /></label>
+          <label class="admin-field"><input aria-label="携带上限" v-model.number="bagMaxTake" class="admin-input" type="number" min="0" placeholder="携带上限" /></label>
+          <button class="admin-btn admin-btn--primary" type="button" @click="openBagConfirm">核对摘要并调整</button>
         </div>
       </div>
 
       <div v-if="canSalaryPay" class="sub-card">
         <h3>批量发放工资</h3>
-        <p class="muted">每行格式：<code>用户名,金额,备注</code></p>
+        <p class="admin-muted">每行格式：<code>用户名,金额,备注</code></p>
         <div class="form-grid">
-          <textarea v-model="salaryText" class="input" rows="5" placeholder="alice,500,四月版主补贴" />
-          <button class="btn btn-primary" type="button" @click="openSalaryConfirm">核对总额并发放</button>
+          <label class="admin-field"><textarea aria-label="alice,500,四月版主补贴" v-model="salaryText" class="admin-textarea" rows="5" placeholder="alice,500,四月版主补贴" /></label>
+          <button class="admin-btn admin-btn--primary" type="button" @click="openSalaryConfirm">核对总额并发放</button>
         </div>
       </div>
     </div>
 
     <div v-if="salaryResults.length" class="sub-card" style="margin-top: 1rem;">
       <h4>{{ salarySummary }}</h4>
-      <table class="data-table">
+      <div class="admin-table-wrap"><table class="admin-table">
         <thead>
           <tr><th>目标</th><th>金额</th><th>结果</th><th>流水 / 错误</th></tr>
         </thead>
@@ -208,7 +209,7 @@ async function executeConfirmed() {
             <td>{{ r.ok ? r.transferId : r.error }}</td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
     </div>
 
     <ConfirmDialog
@@ -220,13 +221,12 @@ async function executeConfirmed() {
       @cancel="confirmOpen = false"
       @confirm="executeConfirmed"
     />
-  </section>
+      </section>
+  </div>
 </template>
 
 <style scoped>
-.panel-head { margin-bottom: 1rem; }
-.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
-.sub-card { border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 0.9rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1rem; }
+.sub-card { border: 1px solid var(--fp-border); border-radius: 8px; padding: 0.9rem; }
 .form-grid { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
-.notice-banner { padding: 0.5rem 0.75rem; border-radius: 6px; background: #eff6ff; color: #1d4ed8; margin-bottom: 0.75rem; }
 </style>

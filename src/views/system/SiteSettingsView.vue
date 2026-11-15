@@ -172,18 +172,18 @@ onMounted(loadAll)
         <div v-if="ipNotice" class="admin-alert admin-alert--success">{{ ipNotice }}</div>
         <div v-if="ipError" class="admin-alert admin-alert--danger">{{ ipError }}</div>
 
-        <div class="admin-stack admin-stack--sm" style="max-width: 640px">
+        <div class="admin-stack admin-stack--sm">
           <div class="admin-field">
-            <label class="admin-field__label">操作类型</label>
-            <select v-model="ipAction" class="admin-select" style="max-width: 260px">
+            <label for="ip-action" class="admin-field__label">操作类型</label>
+            <select id="ip-action" v-model="ipAction" class="admin-select">
               <option value="ban">批量封禁 IP（撤销验证码豁免）</option>
               <option value="unban">批量解封 IP（同步解除验证码盾）</option>
             </select>
           </div>
           <div class="admin-field">
-            <label class="admin-field__label">IP 列表</label>
+            <label for="ip-list" class="admin-field__label">IP 列表</label>
             <textarea
-              v-model="ipListText"
+              id="ip-list" v-model="ipListText"
               class="admin-textarea"
               rows="4"
               placeholder="每行或逗号分隔输入 IP 地址（单次最多 500 条）"
@@ -232,7 +232,7 @@ onMounted(loadAll)
               <tr v-for="opt in miscOptions" :key="opt.oId">
                 <td><code class="admin-mono">{{ opt.oId }}</code></td>
                 <td>
-                  <input v-model="miscDraft[opt.oId]" class="admin-input" />
+                  <input :aria-label="`配置值：${opt.oId}`" v-model="miscDraft[opt.oId]" class="admin-input" />
                 </td>
               </tr>
             </tbody>

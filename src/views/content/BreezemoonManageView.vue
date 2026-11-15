@@ -498,18 +498,18 @@ onMounted(() => {
       </div>
 
       <form class="admin-filters" @submit.prevent="submitSearch">
-        <input
+        <label class="admin-field"><input aria-label="作者 ID（可选）..."
           v-model="authorIdInput"
           type="search"
           class="admin-input bm-author-input"
           placeholder="作者 ID（可选）..."
-        />
-        <input
+        /></label>
+        <label class="admin-field"><input aria-label="搜索 ID、正文、城市或作者用户名..."
           v-model="keywordInput"
           type="search"
           class="admin-input bm-keyword-input"
           placeholder="搜索 ID、正文、城市或作者用户名..."
-        />
+        /></label>
         <button type="submit" class="admin-btn admin-btn--primary" :disabled="loading">搜索</button>
         <button v-if="hasActiveFilter" type="button" class="admin-btn" @click="resetFilters">清空</button>
       </form>
@@ -847,7 +847,7 @@ onMounted(() => {
 .bm-toolbar {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 12px 16px;
 }

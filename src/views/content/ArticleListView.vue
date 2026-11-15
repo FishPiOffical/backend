@@ -405,12 +405,12 @@ onMounted(() => {
             {{ opt.label }}
           </option>
         </select>
-        <input
+        <label class="admin-field"><input aria-label="搜索关键词"
           v-model="keywordInput"
           type="search"
           class="admin-input al-keyword-input"
           placeholder="搜索文章 ID、标题、标签或作者用户名..."
-        />
+        /></label>
         <button type="submit" class="admin-btn admin-btn--primary" :disabled="loading">搜索</button>
         <button v-if="hasActiveFilter" type="button" class="admin-btn" @click="resetFilters">清空</button>
       </form>
@@ -425,7 +425,7 @@ onMounted(() => {
       @go-home="goHome"
     >
       <div class="admin-table-wrap">
-        <table class="admin-table" :class="{ 'admin-table--compact': theme.compactTable }">
+        <table class="admin-table admin-table--wide" :class="{ 'admin-table--compact': theme.compactTable }">
           <thead>
             <tr>
               <th>文章标题与标签</th>
@@ -597,7 +597,7 @@ onMounted(() => {
 .al-toolbar {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 12px 16px;
 }

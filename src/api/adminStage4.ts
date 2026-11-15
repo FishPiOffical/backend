@@ -8,8 +8,8 @@ function writeOpts(
   method: 'POST' | 'PUT',
   idempotencyKey?: string,
   payload?: unknown,
-): RequestInit & { idempotentWrite?: boolean } {
-  const opts: RequestInit & { idempotentWrite?: boolean } = { method }
+): RequestInit & { idempotentWrite?: boolean; skipRefreshRetry?: boolean } {
+  const opts: RequestInit & { idempotentWrite?: boolean; skipRefreshRetry?: boolean } = { method, skipRefreshRetry: !idempotencyKey }
   if (idempotencyKey) {
     opts.idempotentWrite = true
     opts.headers = { 'Idempotency-Key': idempotencyKey }

@@ -80,30 +80,31 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="panel-card">
-    <div class="panel-head">
+  <div class="admin-page">
+    <div class="admin-page__header">
       <div>
         <h2>大事记审核</h2>
-        <p class="muted">
+        <p class="admin-muted">
           与 <RouterLink to="/ops/community-records">鱼游与大事记维护</RouterLink> 共用同一数据表，审核中心专注状态核准与驳回。
         </p>
       </div>
-      <div class="filter-row">
-        <select v-model="statusFilter" class="input" @change="load(1)">
+      <div class="admin-filter-bar admin-search-bar">
+        <select aria-label="状态筛选" v-model="statusFilter" class="admin-select" @change="load(1)">
           <option value="1">待审核</option>
           <option value="2">已通过</option>
           <option value="3">已拒绝</option>
           <option value="all">全部状态</option>
         </select>
-        <input v-model="keyword" class="input" placeholder="标题或正文关键词" @keyup.enter="load(1)" />
-        <button class="btn btn-secondary" type="button" @click="load(1)">查询</button>
+        <input aria-label="标题或正文关键词" v-model="keyword" class="admin-input" placeholder="标题或正文关键词" @keyup.enter="load(1)" />
+        <button class="admin-btn admin-btn--secondary" type="button" @click="load(1)">查询</button>
       </div>
     </div>
+    <section class="admin-panel">
 
     <p v-if="toast" class="notice-banner">{{ toast }}</p>
 
     <PageStateView :state="viewState" :error-message="errorMsg" empty-text="暂无符合条件的大事记" @retry="load(pagination.page)">
-      <table class="data-table">
+      <div class="admin-table-wrap"><table class="admin-table">
         <thead>
           <tr>
             <th>标题</th>
@@ -117,35 +118,32 @@ onMounted(() => {
           <tr v-for="row in items" :key="row.oId">
             <td>
               <strong>{{ row.milestoneTitle }}</strong>
-              <p class="muted">{{ row.milestoneContent || '-' }}</p>
+              <p class="admin-muted">{{ row.milestoneContent || '-' }}</p>
             </td>
             <td>{{ row.milestoneDate }}{{ row.milestoneEndDate ? ` ~ ${row.milestoneEndDate}` : '' }}</td>
             <td>{{ row.authorName || row.milestoneAuthorId || '-' }}</td>
             <td>{{ statusLabel(row.milestoneStatus) }}</td>
             <td>
               <div v-if="canReview" class="btn-row">
-                <button class="btn btn-sm btn-primary" :disabled="actingId === row.oId" @click="changeStatus(row, 2)">通过</button>
-                <button class="btn btn-sm btn-danger" :disabled="actingId === row.oId" @click="changeStatus(row, 3)">拒绝</button>
-                <button class="btn btn-sm" :disabled="actingId === row.oId" @click="changeStatus(row, 1)">退回待审</button>
+                <button class="admin-btn admin-btn--sm admin-btn--primary" :disabled="actingId === row.oId" @click="changeStatus(row, 2)">通过</button>
+                <button class="admin-btn admin-btn--sm admin-btn--danger" :disabled="actingId === row.oId" @click="changeStatus(row, 3)">拒绝</button>
+                <button class="admin-btn admin-btn--sm" :disabled="actingId === row.oId" @click="changeStatus(row, 1)">退回待审</button>
               </div>
             </td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
 
       <div class="pager-bar">
-        <button class="btn btn-sm" :disabled="pagination.page <= 1" @click="load(pagination.page - 1)">上一页</button>
+        <button class="admin-btn admin-btn--sm" :disabled="pagination.page <= 1" @click="load(pagination.page - 1)">上一页</button>
         <span>第 {{ pagination.page }} / {{ pagination.totalPages }} 页（共 {{ pagination.total }} 条）</span>
-        <button class="btn btn-sm" :disabled="pagination.page >= pagination.totalPages" @click="load(pagination.page + 1)">下一页</button>
+        <button class="admin-btn admin-btn--sm" :disabled="pagination.page >= pagination.totalPages" @click="load(pagination.page + 1)">下一页</button>
       </div>
     </PageStateView>
-  </section>
+      </section>
+  </div>
 </template>
 
 <style scoped>
-.panel-head { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
-.filter-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 .btn-row { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-.pager-bar { display: flex; gap: 0.75rem; align-items: center; margin-top: 0.75rem; }
-.notice-banner { padding: 0.5rem 0.75rem; border-radius: 6px; background: #eff6ff; color: #1d4ed8; margin-bottom: 0.75rem; }
 </style>
