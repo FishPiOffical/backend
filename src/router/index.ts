@@ -258,6 +258,17 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'assets/appearance',
+        name: 'appearance',
+        component: () => import('@/views/assets/AppearanceManageView.vue'),
+        meta: {
+          title: '外观管理',
+          groupTitle: '会员与资产',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && c.isAdmin,
+        },
+      },
+      {
         path: 'assets/points-bags',
         name: 'points-bags',
         component: () => import('@/views/assets/PointsBagsView.vue'),

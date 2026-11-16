@@ -163,6 +163,13 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
           (c.isAdmin || Boolean(c.permissions.userGiveMetal || c.permissions.userRemoveMetal)),
       },
       {
+        id: 'appearance',
+        label: '外观管理',
+        to: '/assets/appearance',
+        phase: '四期V3',
+        check: (c) => c.canAccessAdmin && c.isAdmin,
+      },
+      {
         id: 'points-bags',
         label: '积分、工资与背包',
         to: '/assets/points-bags',

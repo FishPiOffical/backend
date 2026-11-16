@@ -39,7 +39,7 @@ async function execute<T>(task: PendingAssetWrite): Promise<T> {
 }
 
 export async function assetRequestData<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const recoverable = /^\/api\/v3\/admin\/(vip|coupons|medals|points|bags|salary)(\/|$)/.test(path)
+  const recoverable = /^\/api\/v3\/admin\/(vip|coupons|medals|points|bags|salary|appearance)(\/|$)/.test(path)
     || path === '/api/v3/admin/fish-games/import'
   if (!options.idempotentWrite || !recoverable) {
     return requestData<T>(path, options)

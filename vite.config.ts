@@ -33,6 +33,11 @@ export default defineConfig({
           'User-Agent': fishpiUa,
         },
       },
+      '^/rhypic-upload/api/v1/files$': {
+        target: 'https://pic.fishpi.cn',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/rhypic-upload/, ''),
+      },
       // 管理端、认证审核及普通 V3 接口代理
       '/api/v3': {
         target: apiTarget,

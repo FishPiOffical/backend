@@ -114,6 +114,7 @@
 | 用户与权限 | 角色权限配置 | `AdminProcessor` 角色管理方法 | `menuAdminRoles` | 待新增 `/api/v3/admin/roles/...` | 第三阶段 | 变更后实时影响能力校验，不得将 OP / 纪律委员批量提升为管理员 |
 | 用户与权限 | 邀请码管理 | `AdminProcessor` 邀请码方法（区分旧状态 `0/1/2`） | `menuAdminIcs` | 待新增 `/api/v3/admin/invitecodes/...` | 第三阶段 | 严格映射 `0` 已使用、`1` 未使用、`2` 停用，禁止猜通用启停枚举 |
 | 会员与资产 | 用户 VIP 开通 / 维护 / 延期 / 退款、套餐与优惠券 | `vip/admin.ftl`（侧栏之外旧入口） | 管理员 / 资产相关授权 | 待新增 `/api/v3/admin/vip/...` | 第三阶段 | 退款沿用按剩余天数计算并失效规则；优惠券次数 `-1` 表示无限制 |
+| 会员与资产 | 外观管理（聊天气泡） | 新增入口 `/assets/appearance` | 第一方管理员且有 `menuAdmin` | `GET /api/v3/admin/appearance/bubbles`、`PUT /api/v3/admin/appearance/bubbles/{id}` | 第四阶段 | 读取需 `profile.read`，草稿、发布及下架需 `settings.write` 和幂等键，历史消息按版本快照显示 |
 | 会员与资产 | 勋章定义、预览、授予、撤销、批量授予 | `AdminProcessor` 勋章管理（`userGiveMetal` / `userRemoveMetal`） | `userGiveMetal` / `userRemoveMetal` | 待新增 `/api/v3/admin/medals/...` | 第三阶段 | 到期时间 `0` 表示永久；保留会员到期回填规则；批量发放返回逐项结果 |
 | 会员与资产 | 积分增减 / 兑换 / 补初始积分 / 工资、背包调整 | `AdminProcessor` 积分与背包操作 | `userAddPoint` / `userExchangePoint` / `userDeductPoint` / `userAdjustBag` | 待新增 `/api/v3/admin/points/...`、`/api/v3/admin/bags/...` | 第三阶段 | 严格事务与幂等键防重复扣发；提交前展示目标、方向、数量与影响摘要 |
 | 社区运营 | 领域与标签、标签绑定、保留词、广告位、鱼游资料与大事记维护 | `AdminProcessor` 领域 / 标签 / RW / AD / 杂项入口 | `menuAdminDomains` / `menuAdminTags` / `menuAdminRWs` / `menuAdminAD` / `menuAdminMilestone` | 待新增 `/api/v3/admin/domains/...` 等 | 第三阶段 | 审核与日常维护职责清晰分离 |
