@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ManagedBubbleShape from '@/components/common/ManagedBubbleShape.vue'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import AdminPagination from '@/components/common/AdminPagination.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
@@ -6,10 +7,13 @@ import { adminBubbles, saveAdminBubble, uploadBubbleIcon, type AdminBubble, type
 import { getAuthContextVersion } from '@/api/http'
 import { assetRecoveryBusy, pendingAssetWrite, assetRecoveryReceipt } from '@/stores/assetRecovery'
 import { useAuthStore } from '@/stores/auth'
-import { bubbleAttributes, decodeBubbleStyle, isCustomBubbleId, type BubblePalette } from '@/utils/bubbleStyle'
+import { bubbleAttributes, decodeBubbleStyle, isCustomBubbleId, type BubblePalette, type BubbleShape } from '@/utils/bubbleStyle'
 import '@/styles/managed-bubbles.css'
 
 const accessLabels = { free: '免费', vip: 'VIP', points: '积分购买' }
+const shapeLabels: Record<BubbleShape, string> = {
+  'memo-v1': '折角便签', 'lotus-v1': '翘角荷叶', 'cat-v1': '双耳饼干', 'fish-v1': '分叉鱼尾',
+}
 const colors: { key: keyof BubblePalette; label: string }[] = [
   { key: 'background', label: '收到背景' }, { key: 'ownBackground', label: '发送背景' },
   { key: 'border', label: '边框' }, { key: 'text', label: '正文' }, { key: 'ink', label: '角标' },
@@ -170,7 +174,7 @@ onBeforeUnmount(() => { alive = false; read?.abort(); upload?.abort() })
           </label>
           <div v-if="editor.access === 'points'" class="field-row">
             <label>7 天积分 <input v-model.number="editor.price7" class="admin-input" type="number" required min="1" max="100000000"></label>
-            <label>30 天积分 <input v-model.number="editor.price30" class="admin-input" type="number" required min="1" max="100000000"></label>
+            <label>30 天积分 <input v-model.number="editor.price30" class="admin-input" type="number" required min="0" max="100000000"><small>填 0 时仅提供 7 天档</small></label>
           </div>
           <fieldset v-for="mode in modes" :key="mode.key" class="color-field">
             <legend>{{ mode.label }}</legend>
@@ -183,14 +187,20 @@ onBeforeUnmount(() => { alive = false; read?.abort(); upload?.abort() })
             <label>边线 <input v-model.number="editor.style.borderWidth" class="admin-input" type="number" required min="0" max="2"></label>
           </div>
           <label class="inline-field"><input v-model="editor.style.shadow" type="checkbox"> 底部阴影</label>
-          <label>角标
+          <label>气泡轮廓
+            <select v-model="editor.style.shape" class="admin-input">
+              <option :value="undefined">经典圆角</option>
+              <option v-for="(label, shape) in shapeLabels" :key="shape" :value="shape">{{ label }}</option>
+            </select>
+          </label>
+          <label v-if="!editor.style.shape">角标
             <select v-model="editor.style.motif" class="admin-input">
               <option value="none">无角标</option><option value="paw">爪印</option><option value="leaf">荷叶</option>
               <option value="bell">铃铛</option><option value="fish">小鱼尾</option>
             </select>
           </label>
-          <label>RhyPic 角标地址 <input v-model.trim="editor.style.image" class="admin-input" type="url" maxlength="512" placeholder="可选，优先使用图片"></label>
-          <label>上传角标 <input class="admin-input" type="file" accept="image/png,image/webp,image/jpeg,image/avif" @change="uploadIcon"></label>
+          <label>RhyPic 装饰图地址 <input v-model.trim="editor.style.image" class="admin-input" type="url" maxlength="512" placeholder="可选，优先使用图片"></label>
+          <label>上传装饰图 <input class="admin-input" type="file" accept="image/png,image/webp,image/jpeg,image/avif" @change="uploadIcon"></label>
           <p v-if="uploading" role="status">正在上传角标…</p>
         </fieldset>
         <div class="appearance-actions">
@@ -209,6 +219,7 @@ onBeforeUnmount(() => { alive = false; read?.abort(); upload?.abort() })
             <span>{{ own ? '自己发出' : '收到消息' }}</span>
             <div class="fp-bubble preview-fallback" v-bind="bubbleAttributes(skin, own)">
               {{ own ? '来了，晚点聊天室见！' : '今天也来摸鱼吗？' }}
+              <ManagedBubbleShape v-if="skin?.shape" :shape="skin.shape" />
               <img v-if="skin?.image" class="managed-bubble-mark" :src="skin.image" alt="">
             </div>
           </div>
@@ -221,11 +232,12 @@ onBeforeUnmount(() => { alive = false; read?.abort(); upload?.abort() })
     <div v-if="rows.length" class="bubble-list">
       <article v-for="row in rows" :key="row.id" class="admin-card bubble-row">
         <div class="fp-bubble sample" v-bind="bubbleAttributes(row.draft.style)">摸鱼
+          <ManagedBubbleShape v-if="row.draft.style.shape" :shape="row.draft.style.shape" />
           <img v-if="row.draft.style.image" class="managed-bubble-mark" :src="row.draft.style.image" alt="">
         </div>
         <div class="bubble-description">
           <h3>{{ row.draft.name }}</h3>
-          <span>{{ accessLabels[row.draft.access] }} · {{ row.active ? `已发布 v${row.publishedRevision}` : row.publishedRevision ? '已下架' : '草稿' }}<template v-if="row.active && row.hasDraftChanges"> · 有未发布修改</template></span>
+          <span>{{ accessLabels[row.draft.access] }}<template v-if="row.draft.access === 'points'"> · {{ row.draft.price7 }} 积分 / 7 天</template> · {{ row.active ? `已发布 v${row.publishedRevision}` : row.publishedRevision ? '已下架' : '草稿' }}<template v-if="row.active && row.hasDraftChanges"> · 有未发布修改</template></span>
         </div>
         <div class="appearance-actions">
           <button type="button" class="admin-btn" :disabled="blocked" @click="edit(row)">编辑</button>
