@@ -117,6 +117,8 @@
 | 会员与资产 | 外观管理（聊天气泡） | 新增入口 `/assets/appearance` | 第一方管理员且有 `menuAdmin` | `GET /api/v3/admin/appearance/bubbles`、`PUT /api/v3/admin/appearance/bubbles/{id}` | 第四阶段 | 读取需 `profile.read`，草稿、发布及下架需 `settings.write` 和幂等键，历史消息按版本快照显示 |
 | 会员与资产 | 勋章定义、预览、授予、撤销、批量授予 | `AdminProcessor` 勋章管理（`userGiveMetal` / `userRemoveMetal`） | `userGiveMetal` / `userRemoveMetal` | 待新增 `/api/v3/admin/medals/...` | 第三阶段 | 到期时间 `0` 表示永久；保留会员到期回填规则；批量发放返回逐项结果 |
 | 会员与资产 | 积分增减 / 兑换 / 补初始积分 / 工资、背包调整 | `AdminProcessor` 积分与背包操作 | `userAddPoint` / `userExchangePoint` / `userDeductPoint` / `userAdjustBag` | 待新增 `/api/v3/admin/points/...`、`/api/v3/admin/bags/...` | 第三阶段 | 严格事务与幂等键防重复扣发；提交前展示目标、方向、数量与影响摘要 |
+| 社区运营 | 复读机转录站添加及历史 | 新增入口 `/ops/repeater-station` | 第一方管理员与 `menuAdmin` | `GET/POST /api/v3/admin/repeater/items` | 第四阶段 | 写入使用 `settings.write` 与幂等键，沿用正文审核 |
+| 社区运营 | 客户端新增、推荐、下架 | 新增入口 `/ops/client-downloads` | 第一方管理员与 `menuAdmin` | `GET /api/v3/admin/client-downloads`、`PUT /api/v3/admin/client-downloads/{id}` | 第四阶段 | 写入使用 `settings.write`、修订号和幂等键 |
 | 社区运营 | 领域与标签、标签绑定、保留词、广告位、鱼游资料与大事记维护 | `AdminProcessor` 领域 / 标签 / RW / AD / 杂项入口 | `menuAdminDomains` / `menuAdminTags` / `menuAdminRWs` / `menuAdminAD` / `menuAdminMilestone` | 待新增 `/api/v3/admin/domains/...` 等 | 第三阶段 | 审核与日常维护职责清晰分离 |
 | 职业与宠物 | 职业目录、等级奖励、规则、草稿/发布/停用/回滚、导入预检、模拟、外观资产 | `ProfessionAdminProcessor` | 管理员 / 职业管理授权 | 待新增 `/api/v3/admin/professions/...` | 第四阶段 | 保留独立工作台及草稿/发布/历史/回滚；导入先预检；迁移和补发政策不得简化为单个开关 |
 | 职业与宠物 | 宠物活动与风控日志 | 旧宠物风控日志网页入口（仅管理员 Session，拒绝 apiKey） | 仅 `adminRole` | 待新增只读 `/api/v3/admin/pets/logs` | 第四阶段 | 首版严格只读，不提供改币、重置宠物或清零动作 |

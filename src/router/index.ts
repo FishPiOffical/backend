@@ -312,6 +312,28 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'ops/repeater-station',
+        name: 'repeater-station',
+        component: () => import('@/views/ops/RepeaterStationView.vue'),
+        meta: {
+          title: '复读机转录站',
+          groupTitle: '社区运营',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && c.isAdmin,
+        },
+      },
+      {
+        path: 'ops/client-downloads',
+        name: 'client-downloads',
+        component: () => import('@/views/ops/ClientDownloadsView.vue'),
+        meta: {
+          title: '客户端下载',
+          groupTitle: '社区运营',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && c.isAdmin,
+        },
+      },
+      {
         path: 'ops/community-records',
         name: 'community-records',
         component: () => import('@/views/ops/CommunityRecordsView.vue'),

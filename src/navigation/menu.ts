@@ -208,6 +208,20 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
           c.canAccessAdmin && Boolean(c.permissions.menuAdminRWs || c.permissions.menuAdminAD),
       },
       {
+        id: 'repeater-station',
+        label: '复读机转录站',
+        to: '/ops/repeater-station',
+        phase: '四期V3',
+        check: (c) => c.canAccessAdmin && c.isAdmin,
+      },
+      {
+        id: 'client-downloads',
+        label: '客户端下载',
+        to: '/ops/client-downloads',
+        phase: '四期V3',
+        check: (c) => c.canAccessAdmin && c.isAdmin,
+      },
+      {
         id: 'community-records',
         label: '鱼游与大事记维护',
         to: '/ops/community-records',

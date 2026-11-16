@@ -1,0 +1,36 @@
+.directory-page, .directory-form, .directory-list, .directory-edit-fields {
+  display: grid;
+  min-width: 0;
+  gap: 1rem;
+}
+.directory-page h2, .directory-page h3, .directory-page p { margin: 0; }
+.directory-heading, .directory-row, .directory-actions, .directory-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .625rem;
+}
+.directory-heading, .directory-row { justify-content: space-between; }
+.directory-form { padding: 1.25rem; }
+.directory-form label:not(.directory-inline) {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  gap: .25rem;
+}
+.directory-form fieldset { display: grid; gap: .625rem; min-width: 0; margin: 0; padding: .75rem; }
+.directory-form .directory-options { display: flex; }
+.directory-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.directory-fields { align-items: end; }
+.directory-fields button { justify-self: start; }
+.directory-inline { display: flex; align-items: center; gap: .375rem; }
+.directory-form textarea { resize: vertical; }
+.directory-list { margin: 0; padding: 0; list-style: none; gap: .5rem; }
+.directory-row, .repeater-entry { padding: .875rem 1rem; overflow-wrap: anywhere; }
+.directory-row .admin-muted { margin-top: .25rem; }
+.repeater-entry p + p { margin-top: .5rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 680px) {
+  .directory-grid { grid-template-columns: minmax(0, 1fr); }
+  .directory-form { padding: .875rem; }
+  .directory-form .admin-input { font-size: 1rem; }
+}
