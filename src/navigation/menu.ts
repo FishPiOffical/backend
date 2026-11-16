@@ -245,6 +245,13 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
         check: (c) => c.canAccessAdmin && c.isAdmin,
       },
       {
+        id: 'pets-manage',
+        label: '宠物管理',
+        to: '/professions/pets',
+        phase: '四期V3',
+        check: (c) => c.canAccessAdmin && c.isAdmin,
+      },
+      {
         id: 'pets-logs',
         label: '宠物活动与风控日志',
         to: '/professions/pet-logs',

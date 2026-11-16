@@ -1,4 +1,6 @@
 import { requestData } from './http'
+import type { PaginationInfo } from './admin'
+import { assetRequestData } from '@/stores/assetRecovery'
 
 /**
  * Rhythm V3 管理后台四期专项与迁移收尾接口客户端封装。
@@ -54,6 +56,29 @@ export async function fetchPetLogs(params: {
   p?: number
 }): Promise<PetLogsResponse> {
   return requestData(`/api/v3/admin/pets/logs${qs(params)}`)
+}
+
+export interface AdminPet {
+  petId: string
+  name: string
+  speciesId: string
+  userId: string
+  userName: string
+  userNickname: string
+  moderated: boolean
+}
+
+export function fetchAdminPets(query: string, p: number, signal: AbortSignal) {
+  return requestData<{ list: AdminPet[]; pagination: PaginationInfo }>(
+    `/api/v3/admin/pets${qs({ q: query, p, size: 20 })}`, { signal, cache: 'no-store' },
+  )
+}
+
+export function moderateAdminPetName(pet: AdminPet) {
+  return assetRequestData<{ petId: string; moderatedName: string }>(
+    `/api/v3/admin/pets/${encodeURIComponent(pet.petId)}/moderate-name`,
+    writeOpts('PUT', crypto.randomUUID(), { expectedName: pet.name }),
+  )
 }
 
 // ==================== IP 管理与站点杂项设置 ====================

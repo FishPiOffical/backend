@@ -99,6 +99,8 @@ function resolveTargetTypeMeta(targetType?: string): {
       return { label: '举报记录', tone: 'warning' }
     case 'repeater':
       return { label: '复读机消息', tone: 'danger' }
+    case 'pet':
+      return { label: '宠物', tone: 'warning' }
     case 'system':
       return { label: '系统/配置', tone: 'neutral' }
     default:
