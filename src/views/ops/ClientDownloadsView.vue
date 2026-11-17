@@ -99,14 +99,19 @@ onScopeDispose(() => { alive = false })
 </script>
 
 <template>
-  <section class="directory-page">
-    <header class="directory-heading">
-      <h2>客户端下载</h2>
-      <button class="admin-btn admin-btn--primary" type="button" :disabled="blocked" @click="start()">新增客户端</button>
+  <section class="admin-page directory-page">
+    <header class="admin-page__header">
+      <div>
+        <h1 class="admin-page__title">客户端下载</h1>
+        <p class="admin-page__subtitle">维护第三方与官方客户端下载条目、推荐状态与版本链接。</p>
+      </div>
+      <div class="admin-page__actions">
+        <button class="admin-btn admin-btn--primary" type="button" :disabled="blocked" @click="start()">新增客户端</button>
+      </div>
     </header>
-    <p v-if="notice" role="status">{{ notice }}</p>
-    <p v-if="failure" role="alert">{{ failure }}</p>
-    <form v-if="draft" class="admin-card directory-form" aria-labelledby="client-form-title" method="post" :aria-busy="busy" @submit.prevent="save">
+    <p v-if="notice" class="admin-alert admin-alert--success" role="status">{{ notice }}</p>
+    <p v-if="failure" class="admin-alert admin-alert--danger" role="alert">{{ failure }}</p>
+    <form v-if="draft" class="admin-panel directory-form" aria-labelledby="client-form-title" method="post" :aria-busy="busy" @submit.prevent="save">
       <h3 id="client-form-title">{{ revision ? '编辑客户端' : '新增客户端' }}</h3>
       <div class="directory-edit-fields" :inert="blocked">
         <div class="directory-grid">
@@ -161,7 +166,7 @@ onScopeDispose(() => { alive = false })
     <p v-else-if="error" role="alert">{{ error }} <button class="admin-btn" type="button" @click="load()">重试</button></p>
     <p v-else-if="!rows.length">暂无客户端。</p>
     <ul v-if="rows.length" class="directory-list">
-      <li v-for="row in rows" :key="row.id" class="admin-card directory-row">
+      <li v-for="row in rows" :key="row.id" class="admin-panel directory-row">
         <div><strong>{{ row.name }}</strong><p class="admin-muted">{{ clientGroups[row.group] }} · {{ clientStatuses[row.status] }}<template v-if="row.recommended"> · 推荐</template></p></div>
         <div class="directory-actions">
           <button class="admin-btn" type="button" :disabled="blocked" @click="start(row)">编辑</button>

@@ -77,10 +77,17 @@ onMounted(async () => { try { const [d, a] = await Promise.all([requestData<Json
 reset()
 </script>
 <template>
-  <section class="admin-panel">
-    <h3 class="admin-page__title">职业配置编辑</h3><p class="admin-page__subtitle">编辑现有版本会保存为新草稿，发布操作在版本列表中单独执行。</p>
-    <div class="admin-filter-bar"><button v-for="[key, label] in [['definition','职业定义'],['scheme','等级方案'],['automation','自动化规则']]" :key="key" class="admin-btn" :class="{ 'admin-btn--primary': mode === key }" :disabled="busy || (key !== 'definition' && !detail)" @click="changeMode(key!)">{{ label }}</button></div>
-    <p v-if="message" class="admin-alert" role="status">{{ message }}</p>
+  <section class="admin-panel admin-stack">
+    <header class="admin-panel__header" style="margin-bottom: 0">
+      <div>
+        <h2 class="admin-panel__title">职业配置编辑</h2>
+        <p class="admin-panel__desc">编辑现有版本会保存为新草稿，发布操作在版本列表中单独执行。</p>
+      </div>
+      <div class="admin-tabs" role="tablist" aria-label="配置编辑模式">
+        <button v-for="[key, label] in [['definition','职业定义'],['scheme','等级方案'],['automation','自动化规则']]" :key="key" type="button" class="admin-tab" :class="{ 'is-active': mode === key }" :disabled="busy || (key !== 'definition' && !detail)" @click="changeMode(key!)">{{ label }}</button>
+      </div>
+    </header>
+    <p v-if="message" class="admin-alert admin-alert--success" role="status">{{ message }}</p>
     <form @submit.prevent="save" @input="changed" @change="changed">
       <fieldset :disabled="busy || uncertain" class="profession-fieldset">
         <label class="config-label">编辑来源<select :value="sourceId" class="admin-select" @change="changeSource"><option value="">新建草稿</option><option v-for="source in sources" :key="String(source.oId)" :value="String(source.oId)">{{ source.oId }} · {{ source.status }} · {{ source.displayName || source.automationCode }}</option></select></label>
