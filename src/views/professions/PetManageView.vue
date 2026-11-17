@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onScopeDispose, ref, watch } from 'vue'
+import AdminAlertBanner from '@/components/common/AdminAlertBanner.vue'
+import AdminPageHeader from '@/components/common/AdminPageHeader.vue'
 import AdminPagination from '@/components/common/AdminPagination.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import { ApiError } from '@/api/http'
@@ -69,15 +71,14 @@ onScopeDispose(() => { mounted = false })
 
 <template>
   <div class="admin-page">
-    <header class="admin-page__header">
-      <div>
-        <h1 class="admin-page__title">宠物管理</h1>
-        <p class="admin-page__subtitle">检索社区宠物与主人信息，支持对违规宠物昵称执行合规重置处理。</p>
-      </div>
-      <div class="admin-page__actions">
+    <AdminPageHeader
+      title="宠物管理"
+      subtitle="检索社区宠物与主人信息，支持对违规宠物昵称执行合规重置处理。"
+    >
+      <template #actions>
         <button type="button" class="admin-btn" :disabled="locked" @click="load()">刷新列表</button>
-      </div>
-    </header>
+      </template>
+    </AdminPageHeader>
 
     <form class="admin-panel pet-search" role="search" method="get" @submit.prevent="applySearch">
       <div class="admin-filters">
@@ -95,8 +96,8 @@ onScopeDispose(() => { mounted = false })
       </div>
     </form>
 
-    <div v-if="success" class="admin-alert admin-alert--success" role="status">{{ success }}</div>
-    <div v-if="failure" class="admin-alert admin-alert--danger" role="alert">{{ failure }}</div>
+    <AdminAlertBanner v-if="success" tone="success" :message="success" />
+    <AdminAlertBanner v-if="failure" tone="danger" :message="failure" />
 
     <div v-if="loading && !rows.length" class="admin-panel pet-state" role="status">正在读取宠物…</div>
     <div v-else-if="error" class="admin-panel pet-state pet-state--error" role="alert">

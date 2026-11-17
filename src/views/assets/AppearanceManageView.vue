@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import ManagedBubbleShape from '@/components/common/ManagedBubbleShape.vue'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import AdminAlertBanner from '@/components/common/AdminAlertBanner.vue'
+import AdminPageHeader from '@/components/common/AdminPageHeader.vue'
 import AdminPagination from '@/components/common/AdminPagination.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
@@ -155,22 +157,19 @@ onBeforeUnmount(() => { alive = false; read?.abort(); upload?.abort() })
 
 <template>
   <div class="admin-page">
-    <header class="admin-page__header">
-      <div>
-        <h1 class="admin-page__title">外观管理 · 聊天气泡</h1>
-        <p class="admin-page__subtitle">
-          管理聊天室与消息气泡皮肤配置，支持浅色/深色双主题实时预览、草稿保存及版本上下架。
-        </p>
-      </div>
-      <div class="admin-page__actions">
+    <AdminPageHeader
+      title="外观管理 · 聊天气泡"
+      subtitle="管理聊天室与消息气泡皮肤配置，支持浅色/深色双主题实时预览、草稿保存及版本上下架。"
+    >
+      <template #actions>
         <button type="button" class="admin-btn admin-btn--primary" :disabled="blocked" @click="edit(null)">
           新建气泡
         </button>
-      </div>
-    </header>
+      </template>
+    </AdminPageHeader>
 
-    <div v-if="notice" class="admin-alert admin-alert--success" role="status">{{ notice }}</div>
-    <div v-if="error" class="admin-alert admin-alert--danger" role="alert">{{ error }}</div>
+    <AdminAlertBanner v-if="notice" tone="success" :message="notice" />
+    <AdminAlertBanner v-if="error" tone="danger" :message="error" />
 
     <form v-if="editor" class="admin-panel bubble-editor" @submit.prevent="execute('save')">
       <div class="bubble-fields">

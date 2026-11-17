@@ -12,9 +12,12 @@ import {
   type PaginationInfo,
 } from '@/api/admin'
 import { ApiError, IdempotencyTracker, isUnknownOutcomeError } from '@/api/http'
+import AdminAlertBanner from '@/components/common/AdminAlertBanner.vue'
 import AdminDrawer from '@/components/common/AdminDrawer.vue'
+import AdminPageHeader from '@/components/common/AdminPageHeader.vue'
 import AdminPagination from '@/components/common/AdminPagination.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import IdempotencyRecoveryBanner from '@/components/common/IdempotencyRecoveryBanner.vue'
 import PageStateView, { type PageViewState } from '@/components/common/PageStateView.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -478,51 +481,31 @@ onMounted(() => {
 
 <template>
   <div class="admin-page">
-    <header class="admin-page__header">
-      <div>
-        <h1 class="admin-page__title">内容管理 · 评论审核与编辑</h1>
-        <p class="admin-page__subtitle">
-          全站评论按时间倒序分页检索，正文统一采用纯文本渲染，禁止 HTML 注入风险，编辑与强删均带审计记录。
-        </p>
-      </div>
-      <div class="admin-page__actions">
+    <AdminPageHeader
+      title="内容管理 · 评论审核与编辑"
+      subtitle="全站评论按时间倒序分页检索，正文统一采用纯文本渲染，禁止 HTML 注入风险，编辑与强删均带审计记录。"
+    >
+      <template #actions>
         <RouterLink v-if="canViewArticles" to="/content/articles" class="admin-btn">
           前往文章管理
         </RouterLink>
         <button type="button" class="admin-btn" :disabled="loading" @click="loadComments">
           {{ loading ? '刷新中...' : '刷新列表' }}
         </button>
-      </div>
-    </header>
+      </template>
+    </AdminPageHeader>
 
-    <div v-if="unknownRecovery" class="cm-banner cm-banner--warning" role="alert">
-      <div class="cm-banner__body">
-        <strong>上次操作结果未明：{{ unknownRecovery.title }}</strong>
-        <p>
-          幂等键 <code class="admin-mono">{{ unknownRecovery.idempotencyKey }}</code> 已保留，建议沿用原幂等键重试确认结果。
-        </p>
-      </div>
-      <div class="cm-banner__actions">
-        <button
-          type="button"
-          class="admin-btn admin-btn--sm admin-btn--primary"
-          :disabled="mutating"
-          @click="unknownRecovery && executeMutation(unknownRecovery)"
-        >
-          按原幂等键重试
-        </button>
-        <button type="button" class="admin-btn admin-btn--sm" :disabled="mutating" @click="discardUnknownRecovery">
-          放弃恢复
-        </button>
-      </div>
-    </div>
+    <IdempotencyRecoveryBanner
+      v-if="unknownRecovery"
+      :title="unknownRecovery.title"
+      :idempotency-key="unknownRecovery.idempotencyKey"
+      :busy="mutating"
+      @retry="unknownRecovery && executeMutation(unknownRecovery)"
+      @discard="discardUnknownRecovery"
+    />
 
-    <div v-if="actionMessage" class="cm-banner cm-banner--success" role="status">
-      {{ actionMessage }}
-    </div>
-    <div v-if="actionError" class="cm-banner cm-banner--danger" role="alert">
-      {{ actionError }}
-    </div>
+    <AdminAlertBanner v-if="actionMessage" tone="success" :message="actionMessage" />
+    <AdminAlertBanner v-if="actionError" tone="danger" :message="actionError" />
 
     <section class="admin-panel cm-toolbar" aria-label="评论筛选工具栏">
       <div class="admin-tabs" role="tablist" aria-label="评论状态筛选">

@@ -10,8 +10,10 @@ import {
   type PaginationInfo,
 } from '@/api/admin'
 import { ApiError, IdempotencyTracker, isUnknownOutcomeError } from '@/api/http'
+import AdminPageHeader from '@/components/common/AdminPageHeader.vue'
 import AdminPagination from '@/components/common/AdminPagination.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import IdempotencyRecoveryBanner from '@/components/common/IdempotencyRecoveryBanner.vue'
 import PageStateView, { type PageViewState } from '@/components/common/PageStateView.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -330,14 +332,11 @@ onMounted(() => {
 
 <template>
   <div class="admin-page">
-    <header class="admin-page__header">
-      <div>
-        <h1 class="admin-page__title">内容管理 · 文章与专栏</h1>
-        <p class="admin-page__subtitle">
-          全站文章检索、长文专栏章节管理、置顶/锁定/封禁与强制移除均通过 V3 发布锁与操作审计接口执行。
-        </p>
-      </div>
-      <div class="admin-page__actions">
+    <AdminPageHeader
+      title="内容管理 · 文章与专栏"
+      subtitle="全站文章检索、长文专栏章节管理、置顶/锁定/封禁与强制移除均通过 V3 发布锁与操作审计接口执行。"
+    >
+      <template #actions>
         <RouterLink
           v-if="auth.capabilities?.actions.articleCreate"
           to="/content/articles/new"
@@ -348,30 +347,20 @@ onMounted(() => {
         <button type="button" class="admin-btn" :disabled="loading" @click="loadArticles">
           {{ loading ? '刷新中...' : '刷新列表' }}
         </button>
-      </div>
-    </header>
+      </template>
+    </AdminPageHeader>
 
-    <div v-if="unknownRecovery" class="al-banner al-banner--warning" role="alert">
-      <div class="al-banner__body">
-        <strong>操作状态待确认：{{ unknownRecovery.title }}</strong>
-        <p>
-          {{ actionError }}
-          <br />
-          <span class="admin-mono">Idempotency-Key: {{ unknownRecovery.idempotencyKey }}</span>
-        </p>
-      </div>
-      <div class="al-banner__actions">
-        <button
-          type="button"
-          class="admin-btn admin-btn--sm admin-btn--primary"
-          :disabled="mutating"
-          @click="executeQuickAction(unknownRecovery)"
-        >
-          按原操作恢复确认
-        </button>
-        <button type="button" class="admin-btn admin-btn--sm" @click="unknownRecovery = null">忽略</button>
-      </div>
-    </div>
+    <IdempotencyRecoveryBanner
+      v-if="unknownRecovery"
+      heading-prefix="操作状态待确认："
+      :title="unknownRecovery.title"
+      :idempotency-key="unknownRecovery.idempotencyKey"
+      :busy="mutating"
+      retry-label="按原操作恢复确认"
+      discard-label="忽略"
+      @retry="executeQuickAction(unknownRecovery)"
+      @discard="unknownRecovery = null"
+    />
 
     <div v-if="actionMessage" class="al-banner al-banner--success" role="status">
       {{ actionMessage }}
