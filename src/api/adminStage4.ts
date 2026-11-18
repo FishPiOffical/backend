@@ -81,6 +81,20 @@ export function moderateAdminPetName(pet: AdminPet) {
   )
 }
 
+export interface PetCoffeeSettings {
+  enabled: boolean
+  price: number
+  version: number
+}
+
+export function fetchPetCoffeeSettings(signal: AbortSignal) {
+  return requestData<PetCoffeeSettings>('/api/v3/admin/pets/coffee', { signal, cache: 'no-store' })
+}
+
+export function savePetCoffeeSettings(settings: PetCoffeeSettings) {
+  return assetRequestData<PetCoffeeSettings>('/api/v3/admin/pets/coffee', writeOpts('PUT', crypto.randomUUID(), settings))
+}
+
 // ==================== IP 管理与站点杂项设置 ====================
 
 export interface IpPolicyStatus {

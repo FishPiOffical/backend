@@ -3,6 +3,7 @@ import { computed, onScopeDispose, ref, watch } from 'vue'
 import AdminAlertBanner from '@/components/common/AdminAlertBanner.vue'
 import AdminPageHeader from '@/components/common/AdminPageHeader.vue'
 import AdminPagination from '@/components/common/AdminPagination.vue'
+import PetCoffeeSettingsPanel from './PetCoffeeSettingsPanel.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import { ApiError } from '@/api/http'
 import { fetchAdminPets, moderateAdminPetName, type AdminPet } from '@/api/adminStage4'
@@ -79,6 +80,8 @@ onScopeDispose(() => { mounted = false })
         <button type="button" class="admin-btn" :disabled="locked" @click="load()">刷新列表</button>
       </template>
     </AdminPageHeader>
+
+    <PetCoffeeSettingsPanel />
 
     <form class="admin-panel pet-search" role="search" method="get" @submit.prevent="applySearch">
       <div class="admin-filters">
