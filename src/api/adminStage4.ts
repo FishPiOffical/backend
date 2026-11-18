@@ -263,3 +263,17 @@ export function fetchParkingLedger(userId: string, page: number, signal: AbortSi
   return requestData<{ list: ParkingLedgerEntry[]; pagination: PaginationInfo }>(
     '/api/v3/admin/parking/ledger' + qs({ userId, p: page, size: 20 }), { signal, cache: 'no-store' })
 }
+
+interface ParkingSample { hits: number; samples: number }
+export interface ParkingMetrics {
+  from: number
+  asOf: number
+  firstPark: ParkingSample
+  emptySearch: ParkingSample
+  nextDay: ParkingSample
+  repeatPairs: ParkingSample
+  upgrade: { samples: number; meanMs: number | null }
+}
+export function fetchParkingMetrics(signal: AbortSignal) {
+  return requestData<ParkingMetrics>('/api/v3/admin/parking/metrics', { signal, cache: 'no-store' })
+}

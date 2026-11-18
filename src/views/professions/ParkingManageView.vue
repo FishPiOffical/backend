@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onScopeDispose, ref, watch } from 'vue'
 import AdminAlertBanner from '@/components/common/AdminAlertBanner.vue'
+import ParkingMetricsPanel from './ParkingMetricsPanel.vue'
 import AdminPageHeader from '@/components/common/AdminPageHeader.vue'
 import AdminPagination from '@/components/common/AdminPagination.vue'
 import { fetchParkingModels, fetchParkingLedger, updateParkingModel, type ParkingModel } from '@/api/adminStage4'
@@ -62,6 +63,7 @@ onScopeDispose(() => { disposed = true; controller?.abort() })
 <template>
   <main class="admin-page parking-admin">
     <AdminPageHeader title="抢车位管理" />
+    <ParkingMetricsPanel />
     <section class="admin-panel">
       <header><h2>车行设置</h2><button class="admin-btn" :disabled="locked" @click="loadCatalog">刷新车行</button></header>
       <p>费率在出车时锁定。下架后，已购车辆仍可停放。</p>
