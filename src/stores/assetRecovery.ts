@@ -41,6 +41,7 @@ async function execute<T>(task: PendingAssetWrite): Promise<T> {
 export async function assetRequestData<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const recoverable = /^\/api\/v3\/admin\/(vip|coupons|medals|points|bags|salary|appearance|client-downloads)(\/|$)/.test(path)
     || path === '/api/v3/admin/fish-games/import' || path === '/api/v3/admin/repeater/items'
+    || /^\/api\/v3\/admin\/parking\/models\/[a-z]{1,24}$/.test(path)
     || path === '/api/v3/admin/pets/coffee'
     || /^\/api\/v3\/admin\/pets\/\d{1,19}\/moderate-name$/.test(path)
   if (!options.idempotentWrite || !recoverable) {

@@ -244,3 +244,22 @@ export async function testProfessionAutomation(
     writeOpts('POST', undefined, { configurationJson, payloadJson }),
   )
 }
+
+export interface ParkingModel {
+  id: string; name: string; starter: boolean; price: number; rate: number; enabled: boolean
+}
+export interface ParkingLedgerEntry {
+  oId: string; userId: string; operation: string; referenceId: string; coinDelta: number; createdAt: number
+}
+export function fetchParkingModels(signal: AbortSignal) {
+  return requestData<{ models: ParkingModel[]; version: number }>('/api/v3/admin/parking/models', { signal, cache: 'no-store' })
+}
+export function updateParkingModel(model: ParkingModel, version: number) {
+  const { price, rate, enabled } = model
+  return assetRequestData('/api/v3/admin/parking/models/' + encodeURIComponent(model.id),
+    writeOpts('PUT', crypto.randomUUID(), { price, rate, enabled, version }))
+}
+export function fetchParkingLedger(userId: string, page: number, signal: AbortSignal) {
+  return requestData<{ list: ParkingLedgerEntry[]; pagination: PaginationInfo }>(
+    '/api/v3/admin/parking/ledger' + qs({ userId, p: page, size: 20 }), { signal, cache: 'no-store' })
+}

@@ -391,6 +391,17 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'professions/parking',
+        name: 'parking-manage',
+        component: () => import('@/views/professions/ParkingManageView.vue'),
+        meta: {
+          title: '抢车位管理',
+          groupTitle: '职业与宠物',
+          requiresAuth: true,
+          checkAccess: (c) => c.canAccessAdmin && c.isAdmin,
+        },
+      },
+      {
         path: 'professions/pet-logs',
         name: 'pets-logs',
         component: () => import('@/views/professions/PetLogsView.vue'),
