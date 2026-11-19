@@ -90,7 +90,7 @@ onScopeDispose(() => { disposed = true; request?.abort() })
       <h2>营业费率</h2><p>新成交的搭班使用新费率，已有搭班继续按成交时的费率结算。</p>
       <form v-if="draft" @submit.prevent="save">
         <label>基础时薪（币）<input class="admin-input" v-model.number="draft.baseRate" required type="number" min="1" max="1000" :disabled="locked"></label>
-        <label>身价每涨 20 币的时薪增量<input class="admin-input" v-model.number="draft.stepRate" required type="number" min="0" max="100" :disabled="locked"></label>
+        <label>请人费用每涨 20 币的时薪增量<input class="admin-input" v-model.number="draft.stepRate" required type="number" min="0" max="100" :disabled="locked"></label>
         <button class="admin-btn admin-btn--primary" :disabled="locked">保存费率</button>
       </form>
       <AdminAlertBanner v-if="message" tone="success" :message="message" />
