@@ -277,3 +277,21 @@ export interface ParkingMetrics {
 export function fetchParkingMetrics(signal: AbortSignal) {
   return requestData<ParkingMetrics>('/api/v3/admin/parking/metrics', { signal, cache: 'no-store' })
 }
+
+export interface PartnerPolicy { baseRate: number; stepRate: number; version: number }
+export interface PartnerReport {
+  from: number; asOf: number; policy: PartnerPolicy & { sinceAt: number }
+  occupancy: { joinedCount: number; fullCount: number }
+  money: { income: number; earningDays: number; netIssued: number }
+  pairs: { transfers: number; quickReturns: number }
+}
+export function fetchPartnerReport(signal: AbortSignal) {
+  return requestData<PartnerReport>('/api/v3/admin/partners/report', { signal, cache: 'no-store' })
+}
+export function fetchPartnerLedger(userId: string, referenceId: string, page: number, signal: AbortSignal) {
+  return requestData<{ list: ParkingLedgerEntry[]; pagination: PaginationInfo }>(
+    '/api/v3/admin/partners/ledger' + qs({ userId, referenceId, p: page, size: 20 }), { signal, cache: 'no-store' })
+}
+export function updatePartnerRate(policy: PartnerPolicy) {
+  return assetRequestData('/api/v3/admin/partners/rate', writeOpts('PUT', crypto.randomUUID(), policy))
+}
