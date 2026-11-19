@@ -27,6 +27,18 @@ await context.route('**/api/v3/**',async route=>{
  else if(path.endsWith('/vip/levels')) data=req.method()==='GET'?{items:[{oId:'vip1',lvCode:'VIP4',lvName:'月度会员',durationType:'MONTH',durationValue:30,price:1000,benefits:JSON.stringify(benefits)}]}:{oId:'vip1'}
  else if(path.endsWith('/vip/users'))data={items:[{userId:'u1',userName:'示例用户',lvCode:'VIP4',state:1,configJson:JSON.stringify(benefits)}],pagination:{page:1,pageSize:20,total:1,totalPages:1}}
  else if(path.endsWith('/coupons'))data={items:[]}
+ else if(path.endsWith('/pets/logs')) {
+  const params = new URL(req.url()).searchParams
+  const tab = params.get('tab'), operation = params.get('operation') || ''
+  const row = { detail:'nature-basics', userNickname:'测试用户', petName:'荷小豚', status:'进行中',
+    petId:'111', operation:'上课', time:'2026-11-19 10:00:00', userId:'222', internalOnly:'不得展示' }
+  data = { tab, operation, page:1, hasNext:false, operations:tab === 'risk' ? { supplies:'领取补给' } : { course:'上课' },
+    rows:tab === 'risk' ? [
+     {...row, operation:'brawl-match', detail:'business_brawl_no_opponent'},
+     {...row, operation:'supplies', detail:'verification_passed'},
+     {...row, operation:'future_operation', detail:'future_reason'},
+    ] : [row] }
+ }
  else if(path.endsWith('/catalog-summary'))data={items:[detail],total:1,page:1,pageSize:20}
  else if(path.endsWith('/professions/p1'))data=detail
  else if(path.endsWith('/definition/metadata'))data={positions:['default','homeProfile'],presets:{shape:['ROUND']}}
@@ -48,6 +60,26 @@ for(const route of paths){
  report.push({route,desktop,mobile,errors:errors.slice(start)});
  if(['review/identity','users/roles','assets/points-bags','system/site-settings','review/images'].includes(route)){await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:output+'/audit-'+route.replaceAll('/','-')+'-mobile.png',fullPage:true})}
 }
+// 使用真实的活动和风控字段形状检查表头、业务拒绝与未知旧值的显示。
+await page.goto(origin+'/manage/professions/pet-logs')
+await page.getByRole('columnheader',{name:'活动编号',exact:true}).waitFor()
+await page.getByRole('button',{name:'风控日志',exact:true}).click()
+await page.getByRole('columnheader',{name:'触发原因 / 验证结果',exact:true}).waitFor()
+assert.equal(await page.getByRole('columnheader',{name:'活动状态',exact:true}).count(),0)
+assert.equal(await page.getByRole('columnheader',{name:'用户昵称',exact:true}).count(),1)
+await page.getByRole('cell',{name:'匹配乱斗对手',exact:true}).waitFor()
+await page.getByRole('cell',{name:'业务未完成 · 暂时没有符合条件的对手',exact:true}).waitFor()
+await page.getByRole('cell',{name:'安全验证通过',exact:true}).waitFor()
+await page.getByRole('cell',{name:'未识别原因（future_reason）',exact:true}).waitFor()
+assert.equal(await page.getByText('不得展示',{exact:true}).count(),0)
+await page.getByLabel('日志操作').selectOption('supplies')
+const filtered = page.waitForRequest(request => request.url().includes('/pets/logs?') && new URL(request.url()).searchParams.get('operation') === 'supplies')
+await page.getByRole('button',{name:'查询',exact:true}).click()
+await filtered
+await page.setViewportSize({width:390,height:844})
+assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))
+console.log('PASS: 宠物日志中文列名、风控原因、未知代码和原筛选值')
+
 // 验证原生单选框方向键分组，夹具材料已读，不请求一次性材料。
 await page.goto(origin+'/manage/review/identity');await page.locator('input[type=radio]').first().focus();await page.keyboard.press('ArrowRight');report.push({radioArrowNavigation:await page.locator('input[type=radio]').evaluateAll(es=>es.map(e=>({name:e.name,checked:e.checked,value:e.value})))})
 await page.goto(origin+'/manage/assets/vip');await page.getByRole('button',{name:'VIP 等级配置',exact:true}).click();await page.getByRole('button',{name:'编辑套餐与权益',exact:true}).click();await page.locator('input[type=checkbox]').first().focus();const checkedBefore=await page.locator('input[type=checkbox]').first().isChecked();await page.keyboard.press('Space');report.push({checkboxSpaceToggle:checkedBefore !== await page.locator('input[type=checkbox]').first().isChecked()});

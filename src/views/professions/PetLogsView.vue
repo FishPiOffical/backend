@@ -5,6 +5,7 @@ import { ApiError } from '@/api/http'
 import PageStateView, { type PageViewState } from '@/components/common/PageStateView.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import { useAuthStore } from '@/stores/auth'
+import { petRiskOperationLabel, petRiskReasonLabel } from './petLogLabels'
 
 /**
  * 宠物活动与风控日志（严格只读）：
@@ -29,8 +30,29 @@ const unauthenticated = ref(false)
 
 const canAccess = computed(() => Boolean(auth.capabilities?.canAccessAdmin && auth.capabilities?.isAdmin))
 const rows = computed(() => data.value?.rows ?? [])
-const columns = computed(() => (rows.value.length > 0 ? Object.keys(rows.value[0]) : []))
-const operationOptions = computed(() => Object.entries(data.value?.operations ?? {}))
+const displayedTab = computed(() => data.value?.tab ?? tab.value)
+type LogColumn = { key: string; label: string }
+const identityColumns: LogColumn[] = [
+  { key: 'time', label: '时间（北京时间）' },
+  { key: 'userNickname', label: '用户昵称' },
+  { key: 'userId', label: '用户 ID' },
+  { key: 'petName', label: '宠物昵称' },
+  { key: 'petId', label: '宠物 ID' },
+  { key: 'operation', label: '操作类型' },
+]
+const columns = computed<LogColumn[]>(() => displayedTab.value === 'risk'
+  ? [...identityColumns, { key: 'detail', label: '触发原因 / 验证结果' }]
+  : [...identityColumns, { key: 'detail', label: '活动编号' }, { key: 'status', label: '活动状态' }])
+const operationOptions = computed(() => data.value?.tab === tab.value ? Object.entries(data.value.operations) : [])
+
+function cellLabel(row: Record<string, string>, key: string) {
+  const value = row[key] ?? ''
+  if (displayedTab.value === 'risk') {
+    if (key === 'operation') return petRiskOperationLabel(value)
+    if (key === 'detail') return petRiskReasonLabel(value)
+  }
+  return value || '—'
+}
 
 const hasActiveFilter = computed(
   () => userFilter.value.trim() !== '' || fromDate.value !== '' || toDate.value !== '' || operationFilter.value !== '',
@@ -147,16 +169,16 @@ onMounted(() => load(1))
         empty-desc="当前筛选条件下没有宠物活动或风控记录。"
         @retry="load(page)"
       >
-        <div class="admin-table-wrap">
+        <div class="admin-table-wrap" role="region" tabindex="0" :aria-label="displayedTab === 'risk' ? '宠物风控日志表格' : '宠物活动日志表格'">
           <table class="admin-table">
             <thead>
               <tr>
-                <th v-for="col in columns" :key="col">{{ col }}</th>
+                <th v-for="col in columns" :key="col.key" scope="col">{{ col.label }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(row, idx) in rows" :key="idx">
-                <td v-for="col in columns" :key="col">{{ row[col] ?? '-' }}</td>
+                <td v-for="col in columns" :key="col.key">{{ cellLabel(row, col.key) }}</td>
               </tr>
             </tbody>
           </table>
